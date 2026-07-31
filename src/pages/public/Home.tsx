@@ -6,6 +6,17 @@ import {
   IconHeart, IconCar, IconBike, IconStar,
 } from '../../components/icons'
 
+const tickerData = [
+  { symbol: 'NIFTY 50', value: '24,532.15', change: '+1.2%', up: true },
+  { symbol: 'SENSEX', value: '80,842.30', change: '+0.9%', up: true },
+  { symbol: 'BANK NIFTY', value: '52,118.45', change: '-0.3%', up: false },
+  { symbol: 'GOLD', value: '72,450', change: '+0.5%', up: true },
+  { symbol: 'USD/INR', value: '83.42', change: '-0.1%', up: false },
+  { symbol: 'NIFTY IT', value: '38,210.80', change: '+1.8%', up: true },
+  { symbol: 'HDFCBANK', value: '1,687.50', change: '+0.7%', up: true },
+  { symbol: 'RELIANCE', value: '2,945.20', change: '+1.1%', up: true },
+]
+
 const whyChoose = [
   { icon: IconTrend, title: 'Guaranteed Monthly Payouts', text: 'Consistent, predictable income every month — turn your capital into a lifelong passive income stream.' },
   { icon: IconChart, title: 'Transparent Reports', text: 'Regular performance reports showing total capital invested and returns earned. No hidden charges.' },
@@ -24,63 +35,91 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-brand-900 via-brand-800 to-brand-700 text-white">
-        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 20% 30%, white 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+      <section className="bg-ink-900 relative overflow-hidden">
+        {/* Gold radial glow */}
+        <div className="absolute inset-0 bg-ink-radial pointer-events-none" />
+        {/* Dot grid overlay */}
+        <div className="absolute inset-0 dot-grid opacity-[0.4]" />
+        {/* Gradient mesh blobs */}
+        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-gold-500/10 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute -bottom-60 -left-40 w-[500px] h-[500px] bg-gold-500/[0.06] blur-[100px] rounded-full pointer-events-none" />
+
         <div className="section relative py-20 lg:py-28">
-          <div className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium ring-1 ring-white/20">
-              <IconShield className="h-4 w-4 text-accent-400" /> SEBI Registered · NISM-Certified Experts
+          <div className="max-w-3xl relative z-10">
+            <span className="inline-flex items-center gap-2 badge-gold">
+              <IconShield className="h-4 w-4" /> SEBI Registered &middot; NISM-Certified Experts
             </span>
-            <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight">
-              Invest Smart. Earn Steady.<br /><span className="text-accent-400">Retire Early.</span>
+            <h1 className="mt-6 text-display-xl font-display text-white">
+              Invest Smart. Earn Steady.<br />
+              <span className="text-gradient-gold">Retire Early.</span>
             </h1>
-            <p className="mt-5 text-lg text-brand-100 max-w-2xl">
+            <p className="mt-6 text-lg text-ink-400 max-w-2xl leading-relaxed">
               The key to your financial freedom. Transform your capital into a guaranteed monthly income through
               a diversified, professionally managed portfolio.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/register" className="btn-accent text-base">Start Investing Today →</Link>
-              <Link to="/plans" className="btn border border-white/30 text-white hover:bg-white/10">View Plans</Link>
+              <Link to="/register" className="btn-gold text-base px-6 py-3">Start Investing Today &rarr;</Link>
+              <Link to="/plans" className="btn-outline-gold text-base px-6 py-3">View Plans</Link>
             </div>
-            <div className="mt-10 grid grid-cols-3 gap-6 max-w-lg">
-              <div><p className="text-3xl font-bold text-accent-400">500+</p><p className="text-sm text-brand-200">Happy Investors</p></div>
-              <div><p className="text-3xl font-bold text-accent-400">₹50Cr+</p><p className="text-sm text-brand-200">Assets Managed</p></div>
-              <div><p className="text-3xl font-bold text-accent-400">99%</p><p className="text-sm text-brand-200">Payout Success</p></div>
+            <div className="mt-12 grid grid-cols-3 gap-8 max-w-lg">
+              <div>
+                <p className="text-3xl font-bold text-gold-400 tabular">500+</p>
+                <p className="text-sm text-ink-400 mt-1">Happy Investors</p>
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-gold-400 tabular">₹50Cr+</p>
+                <p className="text-sm text-ink-400 mt-1">Assets Managed</p>
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-gold-400 tabular">99%</p>
+                <p className="text-sm text-ink-400 mt-1">Payout Success</p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Investment plans */}
-      <section className="section py-16 lg:py-20">
-        <div className="text-center max-w-2xl mx-auto">
-          <h2 className="text-3xl font-bold text-slate-800">Choose Your Financial Path</h2>
-          <p className="mt-3 text-slate-600">Pick a plan designed to give you steady monthly returns and a clear route to early retirement.</p>
+      {/* Market Ticker */}
+      <div className="bg-ink-850 border-y border-white/[0.04] overflow-hidden py-2.5">
+        <div className="flex animate-ticker whitespace-nowrap">
+          {[...tickerData, ...tickerData].map((t, i) => (
+            <div key={i} className="inline-flex items-center gap-2 mx-6 text-sm">
+              <span className="text-ink-300 font-medium">{t.symbol}</span>
+              <span className="text-ink-400 tabular">{t.value}</span>
+              <span className={t.up ? 'text-emerald-400 tabular' : 'text-red-400 tabular'}>{t.change}</span>
+            </div>
+          ))}
         </div>
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
+      </div>
+
+      {/* Investment Plans */}
+      <section className="bg-[#F7F8FB] section py-20">
+        <div className="text-center max-w-2xl mx-auto">
+          <h2 className="text-display-lg font-display text-ink-900">Choose Your Financial Path</h2>
+          <p className="mt-3 text-ink-500">Pick a plan designed to give you steady monthly returns and a clear route to early retirement.</p>
+        </div>
+        <div className="mt-12 grid gap-6 md:grid-cols-3">
           {investmentPlans.map((p) => (
-            <div key={p.tier} className={`card p-6 relative ${p.highlight ? 'ring-2 ring-brand-600 shadow-lg' : ''}`}>
+            <div key={p.tier} className={`premium-card premium-card-hover p-6 relative ${p.highlight ? 'ring-1 ring-gold-500/40 shadow-gold-glow' : ''}`}>
               {p.highlight && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand-600 px-3 py-1 text-xs font-semibold text-white">
-                  Most Popular
-                </span>
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 badge-gold-solid">Most Popular</span>
               )}
-              <h3 className="text-lg font-bold text-brand-700">{p.tier} Plan</h3>
-              <p className="mt-1 text-sm text-slate-500 h-10">{p.description.split('.')[0]}.</p>
-              <div className="mt-4 rounded-xl bg-slate-50 p-4">
-                <p className="text-xs text-slate-500">Investment</p>
-                <p className="text-2xl font-bold text-slate-800">{inr(p.investment, true)}</p>
-                <p className="mt-2 text-xs text-slate-500">Monthly Return</p>
-                <p className="text-2xl font-bold text-accent-600">{p.monthlyReturn ? inr(p.monthlyReturn) : 'Customised'}</p>
+              <h3 className="text-lg font-bold text-ink-800 font-display">{p.tier} Plan</h3>
+              <p className="mt-1 text-sm text-ink-500 h-10">{p.description.split('.')[0]}.</p>
+              <div className="mt-5 rounded-xl bg-ink-50 p-4">
+                <p className="text-xs text-ink-500 uppercase tracking-wide">Investment</p>
+                <p className="text-2xl font-bold text-ink-800 tabular">{inr(p.investment, true)}</p>
+                <p className="mt-2 text-xs text-ink-500 uppercase tracking-wide">Monthly Return</p>
+                <p className="text-2xl font-bold text-gold-600 tabular">{p.monthlyReturn ? inr(p.monthlyReturn) : 'Customised'}</p>
               </div>
-              <ul className="mt-4 space-y-2">
+              <ul className="mt-5 space-y-2.5">
                 {p.features.slice(0, 4).map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-slate-600">
-                    <IconCheck className="mt-0.5 h-4 w-4 shrink-0 text-green-600" /> {f}
+                  <li key={f} className="flex items-start gap-2.5 text-sm text-ink-600">
+                    <IconCheck className="mt-0.5 h-4 w-4 shrink-0 text-gold-500" /> {f}
                   </li>
                 ))}
               </ul>
-              <Link to="/register" className={`mt-6 w-full ${p.highlight ? 'btn-primary' : 'btn-outline'}`}>
+              <Link to="/register" className={`mt-6 w-full block text-center ${p.highlight ? 'btn-gold' : 'btn-outline'}`}>
                 Choose {p.tier}
               </Link>
             </div>
@@ -88,79 +127,90 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Why choose us */}
-      <section className="bg-white py-16 lg:py-20 border-y border-slate-200">
+      {/* Why Choose Us */}
+      <section className="bg-white gold-accent-top py-20">
         <div className="section">
           <div className="text-center max-w-2xl mx-auto">
-            <h2 className="text-3xl font-bold text-slate-800">Why Investors Choose Stock Key Investments?</h2>
-            <p className="mt-3 text-slate-600">A specialised early-retirement investment platform built on transparency and consistent performance.</p>
+            <h2 className="text-display-lg font-display text-ink-900">Why Investors Choose Stock Key?</h2>
+            <p className="mt-3 text-ink-500">A specialised early-retirement investment platform built on transparency and consistent performance.</p>
           </div>
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {whyChoose.map((w) => (
-              <div key={w.title} className="card p-6">
-                <div className="grid h-11 w-11 place-items-center rounded-xl bg-brand-50 text-brand-600">
+              <div key={w.title} className="premium-card p-6">
+                <div className="grid h-11 w-11 place-items-center rounded-xl bg-gold-50 text-gold-600">
                   <w.icon className="h-6 w-6" />
                 </div>
-                <h3 className="mt-4 font-semibold text-slate-800">{w.title}</h3>
-                <p className="mt-1 text-sm text-slate-500">{w.text}</p>
+                <h3 className="mt-4 font-semibold text-ink-800 font-display">{w.title}</h3>
+                <p className="mt-1.5 text-sm text-ink-500 leading-relaxed">{w.text}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Insurance section */}
-      <section className="section py-16 lg:py-20">
-        <div className="text-center max-w-2xl mx-auto">
-          <span className="inline-flex items-center gap-2 rounded-full bg-accent-50 px-3 py-1 text-xs font-semibold text-accent-700">
-            <IconShield className="h-4 w-4" /> Protect What Matters
-          </span>
-          <h2 className="mt-3 text-3xl font-bold text-slate-800">Insurance Made Simple</h2>
-          <p className="mt-3 text-slate-600">Beyond investing — compare and buy Health, Term, Car & Bike insurance from top insurers. Get instant quotes.</p>
-        </div>
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {insuranceCards.map((c) => (
-            <Link key={c.to} to={c.to} className="card p-6 group hover:shadow-md hover:-translate-y-0.5 transition">
-              <div className="grid h-12 w-12 place-items-center rounded-xl bg-accent-50 text-accent-600 group-hover:bg-accent-500 group-hover:text-white transition">
-                <c.icon className="h-6 w-6" />
-              </div>
-              <h3 className="mt-4 font-semibold text-slate-800">{c.title}</h3>
-              <p className="mt-1 text-sm text-slate-500">{c.text}</p>
-              <span className="mt-3 inline-block text-sm font-medium text-brand-600">Get a quote →</span>
-            </Link>
-          ))}
+      {/* Insurance */}
+      <section className="bg-ink-premium relative overflow-hidden py-20">
+        <div className="absolute inset-0 dot-grid opacity-40" />
+        <div className="section relative z-10">
+          <div className="text-center max-w-2xl mx-auto">
+            <span className="inline-flex items-center gap-2 badge-gold">
+              <IconShield className="h-4 w-4" /> Protect What Matters
+            </span>
+            <h2 className="mt-4 text-display-lg font-display text-white">Insurance Made Simple</h2>
+            <p className="mt-3 text-ink-400">Beyond investing — compare and buy Health, Term, Car &amp; Bike insurance from top insurers. Get instant quotes.</p>
+          </div>
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {insuranceCards.map((c) => (
+              <Link key={c.to} to={c.to} className="glass-card glass-card-hover p-6 group">
+                <div className="grid h-12 w-12 place-items-center rounded-xl bg-gold-500/10 text-gold-400 ring-1 ring-gold-500/20">
+                  <c.icon className="h-6 w-6" />
+                </div>
+                <h3 className="mt-4 font-semibold text-white font-display">{c.title}</h3>
+                <p className="mt-1.5 text-sm text-ink-400">{c.text}</p>
+                <span className="mt-3 inline-block text-sm font-medium text-gold-400 group-hover:text-gold-300 transition-colors">Get a quote &rarr;</span>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Testimonial / performance band */}
-      <section className="bg-gradient-to-r from-accent-600 to-brand-700 text-white">
-        <div className="section py-14 grid gap-8 md:grid-cols-2 items-center">
+      {/* Testimonial */}
+      <section className="bg-gradient-to-r from-ink-800 to-ink-900 border-y border-white/[0.04]">
+        <div className="section py-16 grid gap-10 md:grid-cols-2 items-center">
           <div>
-            <div className="flex items-center gap-1 text-accent-200">
-              {[1,2,3,4,5].map((i) => <IconStar key={i} className="h-5 w-5 fill-current" />)}
+            <div className="flex items-center gap-1">
+              {[1,2,3,4,5].map((i) => <IconStar key={i} className="h-5 w-5 fill-current text-gold-400" />)}
             </div>
-            <p className="mt-4 text-xl font-medium leading-relaxed">
-              "I invested ₹5 Lakh and now receive ₹60,000 every month for a year. The transparency reports
-              and consistent payouts have genuinely changed how I plan my retirement."
+            <p className="mt-5 text-xl font-medium leading-relaxed text-white">
+              &ldquo;I invested ₹5 Lakh and now receive ₹60,000 every month for a year. The transparency reports
+              and consistent payouts have genuinely changed how I plan my retirement.&rdquo;
             </p>
-            <p className="mt-4 font-semibold">— A Verified Stock Key Investor</p>
+            <p className="mt-5 font-semibold text-ink-300">&mdash; A Verified Stock Key Investor</p>
           </div>
-          <div className="md:justify-self-end card bg-white/10 ring-1 ring-white/20 p-6 backdrop-blur">
-            <p className="text-sm text-brand-100">Short-term ROI model</p>
-            <p className="mt-1 text-2xl font-bold">₹5,00,000 invested</p>
-            <p className="text-2xl font-bold text-accent-300">→ ₹60,000 / month</p>
-            <p className="mt-1 text-sm text-brand-100">for 1 full year</p>
+          <div className="md:justify-self-end glass-card p-6">
+            <p className="text-sm text-ink-400 uppercase tracking-wide">Short-term ROI model</p>
+            <p className="mt-2 text-2xl font-bold text-white tabular">₹5,00,000 invested</p>
+            <p className="text-2xl font-bold text-gold-400 tabular">&rarr; ₹60,000 / month</p>
+            <p className="mt-1 text-sm text-ink-400">for 1 full year</p>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="section py-16 lg:py-20 text-center">
-        <h2 className="text-3xl font-bold text-slate-800">Ready to unlock your financial freedom?</h2>
-        <p className="mt-3 text-slate-600 max-w-xl mx-auto">Join hundreds of investors building a predictable income stream with Stock Key Investments.</p>
-        <div className="mt-6 flex justify-center gap-3">
-          <Link to="/register" className="btn-primary text-base">Start Investing Today</Link>
-          <Link to="/contact" className="btn-outline text-base">Talk to an Advisor</Link>
+      {/* Final CTA */}
+      <section className="bg-ink-950 relative overflow-hidden py-20">
+        <div className="absolute inset-0 bg-ink-radial pointer-events-none" />
+        <div className="section relative z-10 text-center">
+          <h2 className="text-display-lg font-display text-white">Ready to unlock your financial freedom?</h2>
+          <p className="mt-3 text-ink-400 max-w-xl mx-auto">Join hundreds of investors building a predictable income stream with Stock Key Investments.</p>
+          <div className="mt-8 flex justify-center gap-3">
+            <Link to="/register" className="btn-gold text-base px-6 py-3">Start Investing Today</Link>
+            <Link to="/contact" className="btn-outline-gold text-base px-6 py-3">Talk to an Advisor</Link>
+          </div>
+          <div className="mt-10 flex justify-center flex-wrap gap-3">
+            {['SEBI Registered', 'NISM Certified', '500+ Investors'].map((t) => (
+              <span key={t} className="badge-gold">{t}</span>
+            ))}
+          </div>
         </div>
       </section>
     </div>

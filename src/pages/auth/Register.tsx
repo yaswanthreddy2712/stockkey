@@ -38,59 +38,180 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] grid lg:grid-cols-2">
-      <div className="hidden lg:flex flex-col justify-between bg-gradient-to-br from-accent-600 to-brand-800 text-white p-12">
-        <Link to="/" className="flex items-center gap-2">
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-white/10"><IconChart className="h-5 w-5" /></span>
-          <span className="font-bold">Stock Key Investments</span>
+    <div className="min-h-screen grid lg:grid-cols-2">
+      {/* ── Left panel (visual) ─────────────────────────────────────── */}
+      <div className="bg-ink-900 relative overflow-hidden hidden lg:flex flex-col justify-between p-12">
+        {/* Decorative gold glow */}
+        <div className="pointer-events-none absolute -top-32 -right-32 h-96 w-96 rounded-full bg-gold-500/10 blur-[120px]" />
+        <div className="pointer-events-none absolute bottom-32 left-0 h-72 w-72 rounded-full bg-gold-500/5 blur-[100px]" />
+
+        {/* Dot-grid overlay */}
+        <div className="dot-grid pointer-events-none absolute inset-0 opacity-[0.07]" />
+
+        {/* Top — Logo */}
+        <Link to="/" className="relative z-10 flex items-center gap-2">
+          <span className="grid h-9 w-9 place-items-center rounded-lg bg-gold-500/15">
+            <IconChart className="h-5 w-5 text-gold-500" />
+          </span>
+          <span className="font-bold text-white">Stock Key Investments</span>
         </Link>
-        <div>
-          <h2 className="text-3xl font-bold">Start your journey to early retirement.</h2>
+
+        {/* Center — Heading + features */}
+        <div className="relative z-10 animate-fade-up">
+          <h2 className="text-3xl font-display font-bold leading-tight text-white">
+            Start your journey to early retirement.
+          </h2>
           <ul className="mt-6 space-y-3">
-            {['Guaranteed monthly payouts','Diversified, professionally managed portfolio','Transparent performance reports','Insurance for health, term, car & bike'].map((t) => (
-              <li key={t} className="flex items-center gap-2"><IconCheck className="h-5 w-5 text-accent-300" /> {t}</li>
+            {[
+              'Guaranteed monthly payouts',
+              'Diversified, professionally managed portfolio',
+              'Transparent performance reports',
+              'Insurance for health, term, car & bike',
+            ].map((t) => (
+              <li key={t} className="flex items-center gap-2 text-ink-300">
+                <IconCheck className="h-5 w-5 text-gold-400 flex-shrink-0" />
+                {t}
+              </li>
             ))}
           </ul>
         </div>
-        <p className="text-xs text-brand-100">SEBI Registered · NISM-Certified Experts</p>
+
+        {/* Bottom — Trust badge */}
+        <div className="relative z-10">
+          <span className="badge-gold text-xs">SEBI Registered &middot; NISM-Certified Experts</span>
+        </div>
       </div>
 
-      <div className="flex items-center justify-center p-6 sm:p-10 overflow-y-auto">
-        <div className="w-full max-w-md py-6">
-          <h1 className="text-2xl font-bold text-slate-800">Create your account</h1>
-          <p className="mt-1 text-sm text-slate-500">Open an account and choose your investment plan.</p>
+      {/* ── Right panel (form) ──────────────────────────────────────── */}
+      <div className="flex items-center justify-center p-6 sm:p-10 overflow-y-auto bg-[#F7F8FB]">
+        <div className="w-full max-w-md py-6 animate-fade-up">
+          <h1 className="text-2xl font-display font-bold text-ink-900">
+            Create your account
+          </h1>
+          <p className="mt-1 text-sm text-ink-400">
+            Open an account and choose your investment plan.
+          </p>
 
-          {error && <div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+          {error && (
+            <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-            <div><label className="label">Full Name *</label><input className="input" required value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Your name" /></div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div><label className="label">Email *</label><input className="input" type="email" required value={form.email} onChange={(e) => set('email', e.target.value)} placeholder="you@example.com" /></div>
-              <div><label className="label">Mobile *</label><input className="input" required value={form.phone} onChange={(e) => set('phone', e.target.value)} placeholder="+91 ..." /></div>
+            <div>
+              <label className="label">Full Name *</label>
+              <input
+                className="input input-dark"
+                required
+                value={form.name}
+                onChange={(e) => set('name', e.target.value)}
+                placeholder="Your name"
+              />
             </div>
-            <div><label className="label">Aadhaar Number *</label><input className="input" required value={form.aadhaar} onChange={(e) => set('aadhaar', e.target.value)} placeholder="XXXX-XXXX-1234" /></div>
+
             <div className="grid gap-4 sm:grid-cols-2">
-              <div><label className="label">Password *</label><input className="input" type="password" required value={form.password} onChange={(e) => set('password', e.target.value)} placeholder="Min 6 characters" /></div>
-              <div><label className="label">Confirm *</label><input className="input" type="password" required value={form.confirm} onChange={(e) => set('confirm', e.target.value)} placeholder="Re-enter" /></div>
+              <div>
+                <label className="label">Email *</label>
+                <input
+                  className="input input-dark"
+                  type="email"
+                  required
+                  value={form.email}
+                  onChange={(e) => set('email', e.target.value)}
+                  placeholder="you@example.com"
+                />
+              </div>
+              <div>
+                <label className="label">Mobile *</label>
+                <input
+                  className="input input-dark"
+                  required
+                  value={form.phone}
+                  onChange={(e) => set('phone', e.target.value)}
+                  placeholder="+91 ..."
+                />
+              </div>
             </div>
+
+            <div>
+              <label className="label">Aadhaar Number *</label>
+              <input
+                className="input input-dark"
+                required
+                value={form.aadhaar}
+                onChange={(e) => set('aadhaar', e.target.value)}
+                placeholder="XXXX-XXXX-1234"
+              />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="label">Password *</label>
+                <input
+                  className="input input-dark"
+                  type="password"
+                  required
+                  value={form.password}
+                  onChange={(e) => set('password', e.target.value)}
+                  placeholder="Min 6 characters"
+                />
+              </div>
+              <div>
+                <label className="label">Confirm *</label>
+                <input
+                  className="input input-dark"
+                  type="password"
+                  required
+                  value={form.confirm}
+                  onChange={(e) => set('confirm', e.target.value)}
+                  placeholder="Re-enter"
+                />
+              </div>
+            </div>
+
+            {/* ── Plan selector ───────────────────────────────────── */}
             <div>
               <label className="label">Choose Investment Plan</label>
               <div className="grid grid-cols-3 gap-2">
                 {plans.map((p) => (
-                  <button type="button" key={p.tier} onClick={() => set('plan', p.tier)}
-                    className={`rounded-lg border p-3 text-left text-sm transition ${form.plan === p.tier ? 'border-brand-600 bg-brand-50 ring-1 ring-brand-600' : 'border-slate-200 hover:border-slate-300'}`}>
-                    <span className="block font-semibold text-slate-800">{p.tier}</span>
-                    <span className="block text-xs text-slate-500">₹{p.investment >= 100000 ? `${p.investment / 100000}L` : p.investment}</span>
+                  <button
+                    type="button"
+                    key={p.tier}
+                    onClick={() => set('plan', p.tier)}
+                    className={`rounded-xl border p-3 text-left text-sm transition ${
+                      form.plan === p.tier
+                        ? 'border-gold-500 bg-gold-50/50 ring-1 ring-gold-500/30'
+                        : 'border-ink-200 bg-white hover:border-ink-300'
+                    }`}
+                  >
+                    <span className={`block font-semibold ${form.plan === p.tier ? 'text-gold-700' : 'text-ink-900'}`}>
+                      {p.tier}
+                    </span>
+                    <span className="block text-xs text-ink-400">
+                      {p.payout > 0 ? `₹${p.payout.toLocaleString('en-IN')}/mo` : 'Custom'} &middot;{' '}
+                      ₹{p.investment >= 100000 ? `${p.investment / 100000}L` : p.investment}
+                    </span>
                   </button>
                 ))}
               </div>
             </div>
-            <button type="submit" disabled={loading} className="btn-primary w-full text-base">
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-gold w-full text-base"
+            >
               {loading ? 'Creating...' : 'Create Account'}
             </button>
           </form>
 
-          <p className="mt-6 text-sm text-slate-500">Already have an account? <Link to="/login" className="font-medium text-brand-600">Sign in</Link></p>
+          <p className="mt-6 text-sm text-ink-400">
+            Already have an account?{' '}
+            <Link to="/login" className="font-medium text-gold-600 hover:text-gold-500">
+              Sign in
+            </Link>
+          </p>
         </div>
       </div>
     </div>

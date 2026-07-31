@@ -10,7 +10,7 @@ import {
 } from 'recharts'
 import { Link } from 'react-router-dom'
 
-const PIE_COLORS = ['#2563eb', '#14b8a6', '#8b5cf6', '#f59e0b', '#ef4444']
+const PIE_COLORS = ['#D4AF37', '#B8941F', '#475073', '#2E3A5C', '#11172A']
 
 export default function AdminDashboard() {
   const { customers, leads } = useData()
@@ -53,8 +53,8 @@ export default function AdminDashboard() {
   return (
     <DashboardShell variant="admin">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-800">Admin Dashboard</h1>
-        <p className="text-slate-500 text-sm">Overview of customers, assets under management and leads.</p>
+        <h1 className="text-2xl font-bold text-ink-900 font-display">Admin Dashboard</h1>
+        <p className="text-ink-500 text-sm">Overview of customers, assets under management and leads.</p>
       </div>
 
       {/* Stat cards */}
@@ -67,21 +67,21 @@ export default function AdminDashboard() {
 
       {/* Charts */}
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
-        <div className="card p-5 lg:col-span-2">
-          <h3 className="font-bold text-slate-800 mb-4">Monthly Payouts Trend</h3>
+        <div className="premium-card p-5 lg:col-span-2">
+          <h3 className="font-bold text-ink-800 mb-4 font-display">Monthly Payouts Trend</h3>
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={monthlyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#94a3b8" />
-              <YAxis tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 12 }} stroke="#94a3b8" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#E8EAF0" />
+              <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#475073" />
+              <YAxis tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 12 }} stroke="#475073" />
               <Tooltip formatter={(v: number) => inr(v)} />
-              <Bar dataKey="payouts" name="Payouts" fill="#2563eb" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="payouts" name="Payouts" fill="#D4AF37" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
-        <div className="card p-5">
-          <h3 className="font-bold text-slate-800 mb-4">Plan Distribution</h3>
+        <div className="premium-card p-5">
+          <h3 className="font-bold text-ink-800 mb-4 font-display">Plan Distribution</h3>
           <ResponsiveContainer width="100%" height={260}>
             <PieChart>
               <Pie data={planDist} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3}>
@@ -95,8 +95,8 @@ export default function AdminDashboard() {
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
-        <div className="card p-5">
-          <h3 className="font-bold text-slate-800 mb-4">Asset Allocation</h3>
+        <div className="premium-card p-5">
+          <h3 className="font-bold text-ink-800 mb-4 font-display">Asset Allocation</h3>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie data={assetDist} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
@@ -109,24 +109,24 @@ export default function AdminDashboard() {
         </div>
 
         {/* Recent leads */}
-        <div className="card p-5 lg:col-span-2">
+        <div className="premium-card p-5 lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-slate-800">Recent Leads</h3>
-            <div className="flex gap-2 text-xs">
-              <Link to="/admin/investment-leads" className="text-brand-600">Investment →</Link>
-              <Link to="/admin/insurance-leads" className="text-brand-600">Insurance →</Link>
+            <h3 className="font-bold text-ink-800 font-display">Recent Leads</h3>
+            <div className="flex gap-3 text-xs">
+              <Link to="/admin/investment-leads" className="text-gold-600 hover:text-gold-500">Investment &rarr;</Link>
+              <Link to="/admin/insurance-leads" className="text-gold-600 hover:text-gold-500">Insurance &rarr;</Link>
             </div>
           </div>
           <div className="space-y-3">
             {recentLeads.map((l) => (
-              <div key={l.id} className="flex items-center justify-between border-b border-slate-50 pb-3 last:border-0">
+              <div key={l.id} className="flex items-center justify-between border-b border-ink-50 pb-3 last:border-0">
                 <div className="flex items-center gap-3">
-                  <div className="grid h-9 w-9 place-items-center rounded-full bg-slate-100 text-slate-600 text-xs font-bold">
+                  <div className="grid h-9 w-9 place-items-center rounded-full bg-gold-50 text-gold-600 text-xs font-bold">
                     {l.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-slate-800">{l.name}</p>
-                    <p className="text-xs text-slate-400">{l.type} · {timeAgo(l.createdAt)}</p>
+                    <p className="text-sm font-medium text-ink-800">{l.name}</p>
+                    <p className="text-xs text-ink-400">{l.type} &middot; {timeAgo(l.createdAt)}</p>
                   </div>
                 </div>
                 <Badge color={statusColor(l.status)}>{l.status}</Badge>

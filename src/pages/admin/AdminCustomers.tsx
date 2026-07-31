@@ -69,14 +69,14 @@ export default function AdminCustomers() {
     <DashboardShell variant="admin">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Customers</h1>
-          <p className="text-slate-500 text-sm">{customers.length} total · manage all customer accounts</p>
+          <h1 className="text-2xl font-bold text-ink-900 font-display">Customers</h1>
+          <p className="text-ink-500 text-sm">{customers.length} total &middot; manage all customer accounts</p>
         </div>
-        <button onClick={openAdd} className="btn-primary">+ Add Customer</button>
+        <button onClick={openAdd} className="btn-gold">+ Add Customer</button>
       </div>
 
       {/* Filters */}
-      <div className="card p-4 mb-4 flex flex-wrap gap-3">
+      <div className="premium-card p-4 mb-4 flex flex-wrap gap-3">
         <input className="input max-w-xs" placeholder="Search name, email, phone..." value={search} onChange={(e) => setSearch(e.target.value)} />
         <select className="input max-w-[180px]" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
           {['All', 'Active', 'Pending', 'Inactive'].map((s) => <option key={s} value={s}>{s}</option>)}
@@ -84,47 +84,47 @@ export default function AdminCustomers() {
       </div>
 
       {/* Table */}
-      <div className="card overflow-hidden">
+      <div className="premium-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50">
-              <tr className="text-left text-slate-500">
-                <th className="px-4 py-3 font-medium">Customer</th>
-                <th className="px-4 py-3 font-medium">Plan</th>
-                <th className="px-4 py-3 font-medium">Invested</th>
-                <th className="px-4 py-3 font-medium">Holdings</th>
-                <th className="px-4 py-3 font-medium">KYC</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium text-right">Actions</th>
+            <thead className="bg-ink-50">
+              <tr className="text-left text-ink-500">
+                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wide">Customer</th>
+                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wide">Plan</th>
+                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wide">Invested</th>
+                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wide">Holdings</th>
+                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wide">KYC</th>
+                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wide">Status</th>
+                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wide text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-ink-100">
               {filtered.map((c) => {
                 const holdingsValue = c.holdings.reduce((s, h) => s + holdingValue(h.quantity, h.currentPrice), 0)
                 return (
-                  <tr key={c.id} className="hover:bg-slate-50">
+                  <tr key={c.id} className="hover:bg-gold-50/30 transition-colors">
                     <td className="px-4 py-3">
                       <button onClick={() => setViewing(c)} className="text-left">
-                        <span className="font-semibold text-slate-800 hover:text-brand-600">{c.name}</span>
-                        <br /><span className="text-xs text-slate-400">{c.email}</span>
+                        <span className="font-semibold text-ink-800 hover:text-gold-600 transition-colors">{c.name}</span>
+                        <br /><span className="text-xs text-ink-400">{c.email}</span>
                       </button>
                     </td>
                     <td className="px-4 py-3"><Badge color="blue">{c.plan}</Badge></td>
-                    <td className="px-4 py-3 font-medium">{inr(c.investedAmount, true)}</td>
-                    <td className="px-4 py-3">{holdingsValue ? inr(holdingsValue, true) : <span className="text-slate-400">—</span>}</td>
-                    <td className="px-4 py-3">{c.kycVerified ? <IconCheck className="h-4 w-4 text-green-600" /> : <span className="text-amber-500">Pending</span>}</td>
+                    <td className="px-4 py-3 font-medium tabular">{inr(c.investedAmount, true)}</td>
+                    <td className="px-4 py-3 tabular">{holdingsValue ? inr(holdingsValue, true) : <span className="text-ink-400">&mdash;</span>}</td>
+                    <td className="px-4 py-3">{c.kycVerified ? <IconCheck className="h-4 w-4 text-emerald-600" /> : <span className="text-amber-500">Pending</span>}</td>
                     <td className="px-4 py-3"><Badge color={statusColor(c.status)}>{c.status}</Badge></td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-1">
-                        <button onClick={() => openEdit(c)} className="rounded-md p-1.5 text-slate-500 hover:bg-brand-50 hover:text-brand-600" title="Edit"><IconEdit className="h-4 w-4" /></button>
-                        <button onClick={() => handleDelete(c.id)} className="rounded-md p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-600" title="Delete"><IconTrash className="h-4 w-4" /></button>
+                        <button onClick={() => openEdit(c)} className="rounded-md p-1.5 text-ink-400 hover:bg-gold-50 hover:text-gold-600 transition-colors" title="Edit"><IconEdit className="h-4 w-4" /></button>
+                        <button onClick={() => handleDelete(c.id)} className="rounded-md p-1.5 text-ink-400 hover:bg-red-50 hover:text-red-600 transition-colors" title="Delete"><IconTrash className="h-4 w-4" /></button>
                       </div>
                     </td>
                   </tr>
                 )
               })}
               {filtered.length === 0 && (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-slate-400">No customers found.</td></tr>
+                <tr><td colSpan={7} className="px-4 py-10 text-center text-ink-400">No customers found.</td></tr>
               )}
             </tbody>
           </table>
@@ -157,13 +157,13 @@ export default function AdminCustomers() {
             <div><label className="label">Monthly Payout (₹)</label><input className="input" type="number" value={form.monthlyPayout} onChange={(e) => set('monthlyPayout', Number(e.target.value))} /></div>
             <div className="sm:col-span-2"><label className="label">Address</label><input className="input" value={form.address} onChange={(e) => set('address', e.target.value)} /></div>
             <div className="sm:col-span-2 flex items-center gap-2">
-              <input id="kyc" type="checkbox" checked={form.kycVerified} onChange={(e) => set('kycVerified', e.target.checked)} className="h-4 w-4 rounded accent-brand-600" />
-              <label htmlFor="kyc" className="text-sm text-slate-700">KYC Verified</label>
+              <input id="kyc" type="checkbox" checked={form.kycVerified} onChange={(e) => set('kycVerified', e.target.checked)} className="h-4 w-4 rounded accent-gold-500" />
+              <label htmlFor="kyc" className="text-sm text-ink-700">KYC Verified</label>
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" onClick={() => setModalOpen(false)} className="btn-outline">Cancel</button>
-            <button type="submit" className="btn-primary">{editingId ? 'Save Changes' : 'Add Customer'}</button>
+            <button type="submit" className="btn-gold">{editingId ? 'Save Changes' : 'Add Customer'}</button>
           </div>
         </form>
       </Modal>
@@ -172,29 +172,29 @@ export default function AdminCustomers() {
       <Modal open={!!viewing} onClose={() => setViewing(null)} title="Customer Details" size="md">
         {viewing && (
           <div className="space-y-3 text-sm">
-            <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
-              <div className="grid h-12 w-12 place-items-center rounded-full bg-brand-100 text-brand-700 text-lg font-bold">{viewing.name.charAt(0)}</div>
+            <div className="flex items-center gap-3 pb-3 border-b border-ink-100">
+              <div className="grid h-12 w-12 place-items-center rounded-full bg-gold-50 text-gold-600 text-lg font-bold">{viewing.name.charAt(0)}</div>
               <div>
-                <p className="font-bold text-slate-800">{viewing.name}</p>
-                <p className="text-slate-500">{viewing.email} · {viewing.phone}</p>
+                <p className="font-bold text-ink-800">{viewing.name}</p>
+                <p className="text-ink-500">{viewing.email} &middot; {viewing.phone}</p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div><p className="text-xs text-slate-400">Plan</p><p className="font-medium">{viewing.plan}</p></div>
-              <div><p className="text-xs text-slate-400">Status</p><p><Badge color={statusColor(viewing.status)}>{viewing.status}</Badge></p></div>
-              <div><p className="text-xs text-slate-400">Invested</p><p className="font-medium">{inr(viewing.investedAmount)}</p></div>
-              <div><p className="text-xs text-slate-400">Monthly Payout</p><p className="font-medium">{inr(viewing.monthlyPayout)}</p></div>
-              <div><p className="text-xs text-slate-400">Aadhaar</p><p className="font-medium">{viewing.aadhaar || '—'}</p></div>
-              <div><p className="text-xs text-slate-400">PAN</p><p className="font-medium">{viewing.pan || '—'}</p></div>
-              <div><p className="text-xs text-slate-400">Joined</p><p className="font-medium">{formatDate(viewing.joinDate)}</p></div>
-              <div><p className="text-xs text-slate-400">KYC</p><p>{viewing.kycVerified ? <Badge color="green">Verified</Badge> : <Badge color="amber">Pending</Badge>}</p></div>
-              <div className="col-span-2"><p className="text-xs text-slate-400">Address</p><p className="font-medium">{viewing.address || '—'}</p></div>
+              <div><p className="text-xs text-ink-400">Plan</p><p className="font-medium">{viewing.plan}</p></div>
+              <div><p className="text-xs text-ink-400">Status</p><p><Badge color={statusColor(viewing.status)}>{viewing.status}</Badge></p></div>
+              <div><p className="text-xs text-ink-400">Invested</p><p className="font-medium tabular">{inr(viewing.investedAmount)}</p></div>
+              <div><p className="text-xs text-ink-400">Monthly Payout</p><p className="font-medium tabular">{inr(viewing.monthlyPayout)}</p></div>
+              <div><p className="text-xs text-ink-400">Aadhaar</p><p className="font-medium">{viewing.aadhaar || '—'}</p></div>
+              <div><p className="text-xs text-ink-400">PAN</p><p className="font-medium">{viewing.pan || '—'}</p></div>
+              <div><p className="text-xs text-ink-400">Joined</p><p className="font-medium">{formatDate(viewing.joinDate)}</p></div>
+              <div><p className="text-xs text-ink-400">KYC</p><p>{viewing.kycVerified ? <Badge color="green">Verified</Badge> : <Badge color="amber">Pending</Badge>}</p></div>
+              <div className="col-span-2"><p className="text-xs text-ink-400">Address</p><p className="font-medium">{viewing.address || '—'}</p></div>
             </div>
             {viewing.holdings.length > 0 && (
-              <div className="pt-3 border-t border-slate-100">
-                <p className="text-xs text-slate-400 mb-2">Holdings ({viewing.holdings.length})</p>
+              <div className="pt-3 border-t border-ink-100">
+                <p className="text-xs text-ink-400 mb-2">Holdings ({viewing.holdings.length})</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {viewing.holdings.map((h) => <span key={h.id} className="badge bg-slate-100 text-slate-600">{h.symbol} · {h.quantity}</span>)}
+                  {viewing.holdings.map((h) => <span key={h.id} className="badge bg-ink-50 text-ink-600">{h.symbol} &middot; {h.quantity}</span>)}
                 </div>
               </div>
             )}

@@ -19,6 +19,7 @@ import Register from './pages/auth/Register'
 import CustomerDashboard from './pages/customer/Dashboard'
 import CustomerPortfolio from './pages/customer/Portfolio'
 import CustomerProfile from './pages/customer/Profile'
+import CustomerInsurance from './pages/customer/Insurance'
 
 // Admin
 import AdminDashboard from './pages/admin/AdminDashboard'
@@ -41,19 +42,26 @@ export default function App() {
         <Route path="/insurance" element={<InsuranceHub />} />
         <Route path="/insurance/:category" element={<InsuranceCategory />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/login" element={!isAuthenticated ? <Login /> : <NavigateToDashboard isAdmin={isAdmin} />} />
-        <Route path="/register" element={!isAuthenticated ? <Register /> : <NavigateToDashboard isAdmin={isAdmin} />} />
+        <Route
+          path="/login"
+          element={!isAuthenticated ? <Login /> : <Navigate to={isAdmin ? '/admin' : '/dashboard'} replace />}
+        />
+        <Route
+          path="/register"
+          element={!isAuthenticated ? <Register /> : <Navigate to={isAdmin ? '/admin' : '/dashboard'} replace />}
+        />
         <Route path="*" element={<NotFound />} />
       </Route>
 
-      {/* Customer dashboard — no public navbar/footer, uses own sidebar */}
+      {/* Customer dashboard — guarded layout renders <Outlet/> */}
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<CustomerDashboard />} />
         <Route path="/dashboard/portfolio" element={<CustomerPortfolio />} />
+        <Route path="/dashboard/insurance" element={<CustomerInsurance />} />
         <Route path="/dashboard/profile" element={<CustomerProfile />} />
       </Route>
 
-      {/* Admin panel */}
+      {/* Admin panel — guarded layout renders <Outlet/> */}
       <Route element={<AdminRoute />}>
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/customers" element={<AdminCustomers />} />
@@ -64,9 +72,4 @@ export default function App() {
       </Route>
     </Routes>
   )
-}
-
-// Small redirect helper
-function NavigateToDashboard({ isAdmin }: { isAdmin: boolean }) {
-  return <Navigate to={isAdmin ? '/admin' : '/dashboard'} replace />
 }

@@ -52,12 +52,12 @@ export default function LeadForm({
 
   if (submitted) {
     return (
-      <div className="card p-8 text-center">
-        <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-green-100 text-green-600">
+      <div className="premium-card p-8 text-center">
+        <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-gold-50 text-gold-600">
           <IconCheck className="h-7 w-7" />
         </div>
-        <h3 className="text-xl font-bold text-slate-800">Thank you, {form.name.split(' ')[0]}!</h3>
-        <p className="mt-2 text-slate-600">
+        <h3 className="text-xl font-bold text-ink-900">Thank you, {form.name.split(' ')[0]}!</h3>
+        <p className="mt-2 text-ink-600">
           {type === 'Insurance'
             ? 'Your insurance enquiry has been received. Our advisor will call you within 24 hours with a customised quote.'
             : type === 'Investment'
@@ -68,14 +68,14 @@ export default function LeadForm({
           <button onClick={() => { setSubmitted(false); setForm({ name:'',email:'',phone:'',aadhaar:'',plan:defaultPlan,investmentAmount:0,message:'' }) }} className="btn-outline">
             Submit another
           </button>
-          <button onClick={() => navigate('/')} className="btn-primary">Back to Home</button>
+          <button onClick={() => navigate('/')} className="btn-gold">Back to Home</button>
         </div>
       </div>
     )
   }
 
   return (
-    <form onSubmit={handleSubmit} className={`card ${compact ? 'p-5' : 'p-6'}`}>
+    <form onSubmit={handleSubmit} className={`premium-card ${compact ? 'p-5' : 'p-6'}`}>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="label">Full Name *</label>
@@ -117,15 +117,15 @@ export default function LeadForm({
         )}
 
         {type === 'Insurance' && estimatedPremium && (
-          <div className="sm:col-span-2 rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-800">
+          <div className="sm:col-span-2 rounded-lg bg-gold-50 px-4 py-3 text-sm text-gold-800">
             Estimated premium: <span className="font-bold">{inr(estimatedPremium)}/year</span> · Category: {insuranceCategory}
           </div>
         )}
       </div>
 
       <div className="mt-5 flex items-center justify-between gap-4">
-        <p className="text-xs text-slate-400">By submitting, you agree to be contacted by Stock Key Investments.</p>
-        <button type="submit" className="btn-primary shrink-0">
+        <p className="text-xs text-ink-400">By submitting, you agree to be contacted by Stock Key Investments.</p>
+        <button type="submit" className="btn-gold shrink-0">
           {type === 'Insurance' ? 'Get Quote' : type === 'Investment' ? 'Start Investing' : 'Send Message'}
         </button>
       </div>
