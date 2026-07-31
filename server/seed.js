@@ -153,7 +153,7 @@ const leads = [
 
 async function seed() {
   try {
-    await mongoose.connect(process.env.MONGODB_URI)
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/stock-key')
     console.log('Connected to MongoDB')
 
     await User.deleteMany({})

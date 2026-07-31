@@ -230,10 +230,10 @@ export const investmentPlans: PlanInfo[] = [
   {
     tier: 'Premium',
     investment: 1000000,
-    monthlyReturn: 40000,
-    description: 'Our flagship early-retirement plan. Turn ₹10 Lakh into a guaranteed monthly income for life.',
+    monthlyReturn: 10000,
+    description: 'Our flagship plan. Grow your ₹10 Lakh corpus with a diversified, advisor-managed portfolio targeting ~12% annual returns.',
     features: [
-      '₹40,000 guaranteed monthly payout',
+      'Target ~12% annual returns (≈ ₹10,000/month)',
       'Diversified across Equities, Bonds & ETFs',
       'Dedicated NISM-certified advisor',
       'Quarterly performance reports',
@@ -244,10 +244,10 @@ export const investmentPlans: PlanInfo[] = [
   {
     tier: 'Standard',
     investment: 500000,
-    monthlyReturn: 20000,
-    description: 'A balanced plan to start your passive-income journey with a smaller capital base.',
+    monthlyReturn: 5000,
+    description: 'A balanced plan to start your wealth-building journey with a smaller capital base.',
     features: [
-      '₹20,000 guaranteed monthly payout',
+      'Target ~12% annual returns (≈ ₹5,000/month)',
       'Curated equity + ETF portfolio',
       'Monthly performance reports',
       'Email & phone support',
