@@ -230,10 +230,11 @@ export const investmentPlans: PlanInfo[] = [
   {
     tier: 'Premium',
     investment: 1000000,
-    monthlyReturn: 10000,
-    description: 'Our flagship plan. Grow your ₹10 Lakh corpus with a diversified, advisor-managed portfolio targeting ~12% annual returns.',
+    monthlyReturn: 120000,
+    description: 'Our flagship plan. Invest ₹10 Lakh and receive 12% monthly returns for 12 months.',
     features: [
-      'Target ~12% annual returns (≈ ₹10,000/month)',
+      '₹1,20,000 guaranteed monthly payout',
+      '12% return on investment every month for 1 year',
       'Diversified across Equities, Bonds & ETFs',
       'Dedicated NISM-certified advisor',
       'Quarterly performance reports',
@@ -244,10 +245,11 @@ export const investmentPlans: PlanInfo[] = [
   {
     tier: 'Standard',
     investment: 500000,
-    monthlyReturn: 5000,
-    description: 'A balanced plan to start your wealth-building journey with a smaller capital base.',
+    monthlyReturn: 60000,
+    description: 'Start your passive-income journey with ₹5 Lakh and earn 12% monthly returns.',
     features: [
-      'Target ~12% annual returns (≈ ₹5,000/month)',
+      '₹60,000 guaranteed monthly payout',
+      '12% return on investment every month for 1 year',
       'Curated equity + ETF portfolio',
       'Monthly performance reports',
       'Email & phone support',
@@ -257,10 +259,11 @@ export const investmentPlans: PlanInfo[] = [
   {
     tier: 'Customised',
     investment: 100000,
-    monthlyReturn: 0,
-    description: 'Tailored for ₹1 Lakh to ₹1 Cr — returns structured to your personal risk profile.',
+    monthlyReturn: 12000,
+    description: 'Invest from ₹1 Lakh to ₹1 Cr — earn 12% monthly returns tailored to your risk profile.',
     features: [
-      'Returns matched to your risk appetite',
+      '₹12,000 monthly payout on ₹1 Lakh investment',
+      '12% return on investment every month for 1 year',
       'Flexible investment range (₹1L – ₹1Cr)',
       'Personalised asset allocation',
       'Options, IPOs & Bonds access',

@@ -141,7 +141,7 @@ app.post('/api/auth/register', async (req, res) => {
     const { name, email, password, phone, aadhaar, plan } = req.body
     if (!name || !email || !password || !phone) return res.status(400).json({ ok: false, error: 'Missing required fields.' })
     if (await User.findOne({ email: email.toLowerCase() })) return res.status(409).json({ ok: false, error: 'Account with this email exists.' })
-    const planMonthly = plan === 'Premium' ? 40000 : plan === 'Standard' ? 20000 : 0
+    const planMonthly = plan === 'Premium' ? 120000 : plan === 'Standard' ? 60000 : 12000
     const planInvest = plan === 'Premium' ? 1000000 : plan === 'Standard' ? 500000 : 100000
     const now = new Date().toISOString()
     const cid = `cust_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`

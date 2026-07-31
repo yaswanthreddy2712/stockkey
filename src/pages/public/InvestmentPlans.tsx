@@ -13,7 +13,7 @@ export default function InvestmentPlans() {
         <div className="section relative py-16 z-10">
           <h1 className="text-display-lg font-display text-white">Investment Plans</h1>
           <p className="mt-4 max-w-2xl text-ink-400 text-lg">
-            Choose a plan designed to convert your capital into a steady monthly income and a clear path to early retirement.
+            Choose a plan designed to convert your capital into a steady 12% monthly income for 12 months.
           </p>
         </div>
       </section>
