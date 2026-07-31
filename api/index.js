@@ -230,7 +230,7 @@ async function connectDB() {
   if (cachedDb && mongoose.connection.readyState === 1) return cachedDb
   const MONGODB_URI = process.env.MONGODB_URI
   if (!MONGODB_URI) throw new Error('MONGODB_URI env var not set')
-  cachedDb = await mongoose.connect(MONGODB_URI)
+  cachedDb = await mongoose.connect(MONGODB_URI, { serverSelectionTimeoutMS: 8000, connectTimeoutMS: 8000 })
   return cachedDb
 }
 
