@@ -1,4 +1,4 @@
-import { useState, useMemo, type ReactNode } from 'react'
+import { useState, useMemo, useRef, useEffect, type ReactNode } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useData } from '../../context/DataContext'
 import type { InsuranceCategory, InsurancePlan } from '../../types'
@@ -27,6 +27,13 @@ export default function InsuranceCategoryPage() {
   const [selectedPlan, setSelectedPlan] = useState<InsurancePlan | null>(null)
   const [compareIds, setCompareIds] = useState<string[]>([])
   const [activeTab, setActiveTab] = useState<'cards' | 'compare'>('cards')
+  const leadRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (showLead && selectedPlan && leadRef.current) {
+      leadRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [showLead, selectedPlan])
 
   const estimatedPremiums = useMemo(() => {
     return plans.map((p) => {
@@ -253,9 +260,9 @@ export default function InsuranceCategoryPage() {
         </div>
       </div>
 
-      {/* Lead form modal */}
+      {/* Lead form section */}
       {showLead && selectedPlan && (
-        <section className="bg-white border-t border-ink-100 py-12">
+        <section ref={leadRef} className="bg-white border-t border-ink-100 py-12 scroll-mt-4">
           <div className="section max-w-2xl mx-auto">
             <div className="flex items-center justify-between mb-4">
               <div>
