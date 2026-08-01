@@ -102,7 +102,7 @@ export default function Register() {
             <div>
               <label className="label">Full Name *</label>
               <input
-                className="input input-dark"
+                className="input"
                 required
                 value={form.name}
                 onChange={(e) => set('name', e.target.value)}
@@ -114,7 +114,7 @@ export default function Register() {
               <div>
                 <label className="label">Email *</label>
                 <input
-                  className="input input-dark"
+                  className="input"
                   type="email"
                   required
                   value={form.email}
@@ -125,7 +125,7 @@ export default function Register() {
               <div>
                 <label className="label">Mobile *</label>
                 <input
-                  className="input input-dark"
+                  className="input"
                   required
                   value={form.phone}
                   onChange={(e) => set('phone', e.target.value)}
@@ -137,7 +137,7 @@ export default function Register() {
             <div>
               <label className="label">Aadhaar Number *</label>
               <input
-                className="input input-dark"
+                className="input"
                 required
                 value={form.aadhaar}
                 onChange={(e) => set('aadhaar', e.target.value)}
@@ -149,7 +149,7 @@ export default function Register() {
               <div>
                 <label className="label">Password *</label>
                 <input
-                  className="input input-dark"
+                  className="input"
                   type="password"
                   required
                   value={form.password}
@@ -160,7 +160,7 @@ export default function Register() {
               <div>
                 <label className="label">Confirm *</label>
                 <input
-                  className="input input-dark"
+                  className="input"
                   type="password"
                   required
                   value={form.confirm}

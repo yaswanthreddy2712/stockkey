@@ -81,7 +81,7 @@ export default function Login() {
               <div className="relative">
                 <IconUser className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-400" />
                 <input
-                  className="input input-dark pl-9"
+                  className="input pl-9"
                   type="email"
                   required
                   value={email}
@@ -95,7 +95,7 @@ export default function Login() {
               <div className="relative">
                 <IconLock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-400" />
                 <input
-                  className="input input-dark pl-9"
+                  className="input pl-9"
                   type="password"
                   required
                   value={password}
