@@ -26,6 +26,7 @@ import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminCustomers from './pages/admin/AdminCustomers'
 import AdminPortfolios from './pages/admin/AdminPortfolios'
 import AdminLeads from './pages/admin/AdminLeads'
+import AdminBroadcast from './pages/admin/AdminBroadcast'
 
 import NotFound from './pages/NotFound'
 
@@ -69,6 +70,7 @@ export default function App() {
         <Route path="/admin/insurance-leads" element={<AdminLeads type="Insurance" />} />
         <Route path="/admin/investment-leads" element={<AdminLeads type="Investment" />} />
         <Route path="/admin/contact-leads" element={<AdminLeads type="Contact" />} />
+        <Route path="/admin/broadcast" element={<AdminBroadcast />} />
       </Route>
     </Routes>
   )

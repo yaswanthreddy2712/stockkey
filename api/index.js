@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import mongoose from 'mongoose'
+import nodemailer from 'nodemailer'
 
 // ─── MODELS ──────────────────────────────────────────────────────────
 
@@ -44,6 +45,7 @@ const Customer = mongoose.model('Customer', new mongoose.Schema({
   paymentMethod: { type: String, enum: ['UPI (GPay/PhonePe/Paytm)', 'Bank Transfer / NEFT / RTGS', 'Cheque', 'Cash'], default: '' },
   utrNumber: { type: String, default: '' },
   referenceNo: { type: String, default: '' },
+  paymentStatus: { type: String, enum: ['Pending', 'Verified', 'Rejected'], default: 'Pending' },
   holdings: [{
     _id: { type: String, required: true },
     symbol: String, name: String,
@@ -224,6 +226,200 @@ app.get('/api/insurance-plans', async (_req, res) => {
 })
 app.get('/api/stocks', async (_req, res) => {
   try { res.json(await StockPrice.find()) } catch { res.status(500).json({ error: 'Server error.' }) }
+})
+
+// ─── EMAIL SERVICE ─────────────────────────────────────────────────────
+
+function createTransporter() {
+  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) return null
+  return nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: Number(SMTP_PORT) || 587,
+    secure: Number(SMTP_PORT) === 465,
+    auth: { user: SMTP_USER, pass: SMTP_PASS },
+  })
+}
+
+const emailTemplates = {
+  welcome: (name, email) => ({
+    subject: `Welcome to Stock Key Investments, ${name}!`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+        <div style="background: linear-gradient(135deg, #1a1f2e 0%, #0d1117 100%); padding: 32px; text-align: center;">
+          <h1 style="color: #D4AF37; margin: 0; font-size: 24px;">Stock Key Investments</h1>
+          <p style="color: #9ca3af; margin: 8px 0 0;">SEBI Registered · NISM-Certified Experts</p>
+        </div>
+        <div style="padding: 32px;">
+          <h2 style="color: #1a1f2e; margin: 0 0 16px;">Welcome, ${name}! 🎉</h2>
+          <p style="color: #475569; line-height: 1.6;">
+            Your account has been created successfully. You're now part of the Stock Key Investments family.
+          </p>
+          <div style="background: #f8f9fa; border-left: 4px solid #D4AF37; padding: 16px; margin: 20px 0; border-radius: 4px;">
+            <p style="margin: 0; color: #475569;"><strong>Account Email:</strong> ${email}</p>
+            <p style="margin: 8px 0 0; color: #475569;">You can now log in to view your investment plans and portfolio.</p>
+          </div>
+          <p style="color: #475569; line-height: 1.6;">
+            Our team will verify your payment and activate your account shortly. 
+            You'll receive another email once your account is fully active.
+          </p>
+          <div style="text-align: center; margin: 28px 0;">
+            <a href="https://stock-sigma-seven.vercel.app/login" style="background: #D4AF37; color: #1a1f2e; padding: 12px 32px; text-decoration: none; border-radius: 8px; font-weight: bold;">Login to Dashboard</a>
+          </div>
+        </div>
+        <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+          <p style="color: #9ca3af; font-size: 12px; margin: 0;">Stock Key Investments · SEBI Registered · NISM-Certified Experts</p>
+          <p style="color: #9ca3af; font-size: 12px; margin: 4px 0 0;">Need help? Contact us at <a href="tel:+917013178382" style="color: #D4AF37;">+91 70131 78382</a></p>
+        </div>
+      </div>
+    `,
+  }),
+
+  paymentVerified: (name) => ({
+    subject: `Payment Verified — Your Investment is Active!`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+        <div style="background: linear-gradient(135deg, #1a1f2e 0%, #0d1117 100%); padding: 32px; text-align: center;">
+          <h1 style="color: #D4AF37; margin: 0; font-size: 24px;">Stock Key Investments</h1>
+        </div>
+        <div style="padding: 32px;">
+          <h2 style="color: #16a34a; margin: 0 0 16px;">Payment Verified ✅</h2>
+          <p style="color: #475569; line-height: 1.6;">
+            Hi ${name}, your investment payment has been verified and your account is now <strong>Active</strong>.
+          </p>
+          <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 16px; margin: 20px 0; border-radius: 4px;">
+            <p style="margin: 0; color: #166534;">Your monthly payouts will begin as per your investment plan. You can track everything from your dashboard.</p>
+          </div>
+          <div style="text-align: center; margin: 28px 0;">
+            <a href="https://stock-sigma-seven.vercel.app/dashboard" style="background: #D4AF37; color: #1a1f2e; padding: 12px 32px; text-decoration: none; border-radius: 8px; font-weight: bold;">View Dashboard</a>
+          </div>
+        </div>
+        <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+          <p style="color: #9ca3af; font-size: 12px; margin: 0;">Stock Key Investments · SEBI Registered · NISM-Certified Experts</p>
+        </div>
+      </div>
+    `,
+  }),
+
+  paymentRejected: (name) => ({
+    subject: `Payment Verification Issue — Action Required`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+        <div style="background: linear-gradient(135deg, #1a1f2e 0%, #0d1117 100%); padding: 32px; text-align: center;">
+          <h1 style="color: #D4AF37; margin: 0; font-size: 24px;">Stock Key Investments</h1>
+        </div>
+        <div style="padding: 32px;">
+          <h2 style="color: #dc2626; margin: 0 0 16px;">Payment Verification Needed</h2>
+          <p style="color: #475569; line-height: 1.6;">
+            Hi ${name}, we were unable to verify your payment. Please contact our support team to resolve this.
+          </p>
+          <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 16px; margin: 20px 0; border-radius: 4px;">
+            <p style="margin: 0; color: #991b1b;">Please call us at <strong>+91 70131 78382</strong> or reply to this email with your payment proof (screenshot/UTR number).</p>
+          </div>
+        </div>
+        <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+          <p style="color: #9ca3af; font-size: 12px; margin: 0;">Stock Key Investments · SEBI Registered · NISM-Certified Experts</p>
+        </div>
+      </div>
+    `,
+  }),
+
+  monthlyPayout: (name, amount) => ({
+    subject: `Monthly Payout of ₹${Number(amount).toLocaleString('en-IN')} Credited!`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+        <div style="background: linear-gradient(135deg, #1a1f2e 0%, #0d1117 100%); padding: 32px; text-align: center;">
+          <h1 style="color: #D4AF37; margin: 0; font-size: 24px;">Stock Key Investments</h1>
+        </div>
+        <div style="padding: 32px;">
+          <h2 style="color: #16a34a; margin: 0 0 16px;">Monthly Payout Credited 💰</h2>
+          <p style="color: #475569; line-height: 1.6;">
+            Hi ${name}, your monthly investment payout has been credited to your account.
+          </p>
+          <div style="text-align: center; margin: 28px 0; padding: 24px; background: #f0fdf4; border-radius: 12px;">
+            <p style="color: #166534; margin: 0; font-size: 14px;">Amount Credited</p>
+            <p style="color: #16a34a; margin: 8px 0 0; font-size: 32px; font-weight: bold;">₹${Number(amount).toLocaleString('en-IN')}</p>
+          </div>
+          <div style="text-align: center; margin: 28px 0;">
+            <a href="https://stock-sigma-seven.vercel.app/dashboard" style="background: #D4AF37; color: #1a1f2e; padding: 12px 32px; text-decoration: none; border-radius: 8px; font-weight: bold;">View Dashboard</a>
+          </div>
+        </div>
+        <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+          <p style="color: #9ca3af; font-size: 12px; margin: 0;">Stock Key Investments · SEBI Registered · NISM-Certified Experts</p>
+        </div>
+      </div>
+    `,
+  }),
+
+  broadcast: (name, subject, body) => ({
+    subject,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+        <div style="background: linear-gradient(135deg, #1a1f2e 0%, #0d1117 100%); padding: 32px; text-align: center;">
+          <h1 style="color: #D4AF37; margin: 0; font-size: 24px;">Stock Key Investments</h1>
+        </div>
+        <div style="padding: 32px;">
+          <p style="color: #475569; line-height: 1.6;">Hi ${name},</p>
+          <div style="color: #475569; line-height: 1.8; white-space: pre-wrap;">${body}</div>
+        </div>
+        <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+          <p style="color: #9ca3af; font-size: 12px; margin: 0;">Stock Key Investments · SEBI Registered · NISM-Certified Experts</p>
+          <p style="color: #9ca3af; font-size: 12px; margin: 4px 0 0;">Need help? Contact us at <a href="tel:+917013178382" style="color: #D4AF37;">+91 70131 78382</a></p>
+        </div>
+      </div>
+    `,
+  }),
+}
+
+// Email API endpoints
+app.post('/api/email/send', async (req, res) => {
+  try {
+    const { to, template, data } = req.body
+    if (!to || !template) return res.status(400).json({ error: 'Missing required fields.' })
+    const transporter = createTransporter()
+    if (!transporter) return res.status(503).json({ error: 'Email not configured. Set SMTP_HOST, SMTP_USER, SMTP_PASS env vars.' })
+
+    let emailContent
+    switch (template) {
+      case 'welcome': emailContent = emailTemplates.welcome(data?.name || 'Investor', to); break
+      case 'paymentVerified': emailContent = emailTemplates.paymentVerified(data?.name || 'Investor'); break
+      case 'paymentRejected': emailContent = emailTemplates.paymentRejected(data?.name || 'Investor'); break
+      case 'monthlyPayout': emailContent = emailTemplates.monthlyPayout(data?.name || 'Investor', data?.amount || 0); break
+      default: return res.status(400).json({ error: 'Unknown template.' })
+    }
+    await transporter.sendMail({ from: `"Stock Key Investments" <${process.env.SMTP_USER}>`, to, subject: emailContent.subject, html: emailContent.html })
+    res.json({ ok: true, message: `Email sent to ${to}` })
+  } catch (err) { console.error('Email error:', err.message); res.status(500).json({ error: 'Failed to send email.' }) }
+})
+
+app.post('/api/email/broadcast', async (req, res) => {
+  try {
+    const { subject, body, audience } = req.body
+    if (!subject || !body) return res.status(400).json({ error: 'Subject and body are required.' })
+    const transporter = createTransporter()
+    if (!transporter) return res.status(503).json({ error: 'Email not configured. Set SMTP_HOST, SMTP_USER, SMTP_PASS env vars.' })
+
+    let filter = {}
+    if (audience === 'Active') filter.status = 'Active'
+    else if (audience === 'Pending') filter.status = 'Pending'
+    const customers = await Customer.find(filter).select('name email')
+    if (customers.length === 0) return res.json({ ok: true, sent: 0, message: 'No customers to email.' })
+
+    let sent = 0, failed = 0
+    for (const c of customers) {
+      try {
+        const content = emailTemplates.broadcast(c.name, subject, body)
+        await transporter.sendMail({ from: `"Stock Key Investments" <${process.env.SMTP_USER}>`, to: c.email, subject: content.subject, html: content.html })
+        sent++
+      } catch { failed++ }
+    }
+    res.json({ ok: true, sent, failed, total: customers.length })
+  } catch (err) { console.error('Broadcast error:', err.message); res.status(500).json({ error: 'Failed to broadcast.' }) }
+})
+
+app.get('/api/email/check-config', (_req, res) => {
+  const configured = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS)
+  res.json({ configured, host: process.env.SMTP_HOST || null, user: process.env.SMTP_USER || null })
 })
 
 // ─── VERCEL HANDLER ───────────────────────────────────────────────────

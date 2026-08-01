@@ -45,4 +45,15 @@ export const api = {
   // Reference data
   getInsurancePlans: () => request<any[]>('/insurance-plans'),
   getStocks: () => request<any[]>('/stocks'),
+
+  // Email
+  sendEmail: (to: string, template: string, data?: Record<string, any>) =>
+    request<{ ok: boolean; message?: string; error?: string }>('/email/send', {
+      method: 'POST', body: JSON.stringify({ to, template, data }),
+    }),
+  broadcastEmail: (subject: string, body: string, audience: string) =>
+    request<{ ok: boolean; sent: number; failed: number; total: number; error?: string }>('/email/broadcast', {
+      method: 'POST', body: JSON.stringify({ subject, body, audience }),
+    }),
+  checkEmailConfig: () => request<{ configured: boolean; host: string | null; user: string | null }>('/email/check-config'),
 }

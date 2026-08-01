@@ -6,6 +6,7 @@ import Modal from '../../components/ui/Modal'
 import InvestmentCertificate from '../../components/InvestmentCertificate'
 import { inr, formatDate, holdingValue } from '../../lib/utils'
 import { IconEdit, IconTrash, IconCheck, IconDownload } from '../../components/icons'
+import { api } from '../../lib/api'
 import type { Customer, InvestmentPlanTier } from '../../types'
 
 const emptyCustomer = (): Omit<Customer, 'id'> => ({
@@ -13,6 +14,7 @@ const emptyCustomer = (): Omit<Customer, 'id'> => ({
   investedAmount: 500000, monthlyPayout: 60000, joinDate: new Date().toISOString(),
   status: 'Pending', kycVerified: false, address: '', dateOfBirth: '', photo: '',
   paymentMethod: 'UPI (GPay/PhonePe/Paytm)', utrNumber: '', referenceNo: '',
+  paymentStatus: 'Pending',
   holdings: [], transactions: [],
 })
 
@@ -129,6 +131,7 @@ export default function AdminCustomers() {
                 <th className="px-4 py-3 font-medium text-xs uppercase tracking-wide">Invested</th>
                 <th className="px-4 py-3 font-medium text-xs uppercase tracking-wide">Holdings</th>
                 <th className="px-4 py-3 font-medium text-xs uppercase tracking-wide">KYC</th>
+                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wide">Payment</th>
                 <th className="px-4 py-3 font-medium text-xs uppercase tracking-wide">Status</th>
                 <th className="px-4 py-3 font-medium text-xs uppercase tracking-wide text-right">Actions</th>
               </tr>
@@ -148,6 +151,9 @@ export default function AdminCustomers() {
                     <td className="px-4 py-3 font-medium tabular">{inr(c.investedAmount, true)}</td>
                     <td className="px-4 py-3 tabular">{holdingsValue ? inr(holdingsValue, true) : <span className="text-ink-400">&mdash;</span>}</td>
                     <td className="px-4 py-3">{c.kycVerified ? <IconCheck className="h-4 w-4 text-emerald-600" /> : <span className="text-amber-500">Pending</span>}</td>
+                    <td className="px-4 py-3">
+                      <Badge color={c.paymentStatus === 'Verified' ? 'green' : c.paymentStatus === 'Rejected' ? 'red' : 'amber'}>{c.paymentStatus || 'Pending'}</Badge>
+                    </td>
                     <td className="px-4 py-3"><Badge color={statusColor(c.status)}>{c.status}</Badge></td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-1">
@@ -215,6 +221,13 @@ export default function AdminCustomers() {
             </div>
             <div><label className="label">UTR / Transaction No. *</label><input className="input" required value={form.utrNumber} onChange={(e) => set('utrNumber', e.target.value)} placeholder="e.g. 123456789012" /></div>
             <div className="sm:col-span-2"><label className="label">Reference No. (optional)</label><input className="input" value={form.referenceNo} onChange={(e) => set('referenceNo', e.target.value)} placeholder="Bank reference, cheque no. etc." /></div>
+            <div>
+              <label className="label">Payment Verification</label>
+              <select className="input" value={form.paymentStatus} onChange={(e) => set('paymentStatus', e.target.value as any)}>
+                {(['Pending', 'Verified', 'Rejected'] as const).map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+              <p className="text-[10px] text-ink-400 mt-1">Set to Verified after confirming payment receipt</p>
+            </div>
             <div className="sm:col-span-2 flex items-center gap-2">
               <input id="kyc" type="checkbox" checked={form.kycVerified} onChange={(e) => set('kycVerified', e.target.checked)} className="h-4 w-4 rounded accent-gold-500" />
               <label htmlFor="kyc" className="text-sm text-ink-700">KYC Verified</label>
@@ -258,6 +271,16 @@ export default function AdminCustomers() {
               <div><p className="text-xs text-ink-400">Payment Method</p><p className="font-medium">{viewing.paymentMethod || '—'}</p></div>
               <div><p className="text-xs text-ink-400">UTR / Transaction No.</p><p className="font-medium tabular">{viewing.utrNumber || '—'}</p></div>
               {viewing.referenceNo && <div><p className="text-xs text-ink-400">Reference No.</p><p className="font-medium tabular">{viewing.referenceNo}</p></div>}
+              <div>
+                <p className="text-xs text-ink-400">Payment Status</p>
+                <p><Badge color={viewing.paymentStatus === 'Verified' ? 'green' : viewing.paymentStatus === 'Rejected' ? 'red' : 'amber'}>{viewing.paymentStatus || 'Pending'}</Badge></p>
+              </div>
+              {viewing.paymentStatus !== 'Verified' && (
+                <div className="col-span-2 flex gap-2 mt-1">
+                  <button onClick={() => { updateCustomer(viewing.id, { paymentStatus: 'Verified' }); setViewing({ ...viewing, paymentStatus: 'Verified' }); api.sendEmail(viewing.email, 'paymentVerified', { name: viewing.name }).catch(() => {}) }} className="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-600 transition-colors">Verify Payment</button>
+                  <button onClick={() => { updateCustomer(viewing.id, { paymentStatus: 'Rejected' }); setViewing({ ...viewing, paymentStatus: 'Rejected' }); api.sendEmail(viewing.email, 'paymentRejected', { name: viewing.name }).catch(() => {}) }} className="rounded-lg bg-red-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-600 transition-colors">Reject</button>
+                </div>
+              )}
             </div>
             {viewing.holdings.length > 0 && (
               <div className="pt-3 border-t border-ink-100">

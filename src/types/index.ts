@@ -35,6 +35,7 @@ export interface Transaction {
 }
 
 export type PaymentMethod = 'UPI (GPay/PhonePe/Paytm)' | 'Bank Transfer / NEFT / RTGS' | 'Cheque' | 'Cash'
+export type PaymentStatus = 'Pending' | 'Verified' | 'Rejected'
 
 export interface Customer {
   id: string
@@ -57,6 +58,7 @@ export interface Customer {
   paymentMethod: PaymentMethod
   utrNumber: string
   referenceNo: string
+  paymentStatus: PaymentStatus
 }
 
 export type InsuranceCategory = 'Health' | 'Term' | 'Car' | 'Bike'

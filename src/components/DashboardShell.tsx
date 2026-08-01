@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { IconDashboard, IconChart, IconUsers, IconShield, IconLogout, IconUser, IconWallet, IconBriefcase } from './icons'
+import { IconDashboard, IconChart, IconUsers, IconShield, IconLogout, IconUser, IconWallet, IconBriefcase, IconMail } from './icons'
 
 interface NavItem { to: string; label: string; icon: (p: { className?: string }) => ReactNode; end?: boolean }
 
@@ -18,6 +18,8 @@ const adminNav: NavItem[] = [
   { to: '/admin/portfolios', label: 'Portfolios', icon: IconChart },
   { to: '/admin/insurance-leads', label: 'Insurance Leads', icon: IconShield },
   { to: '/admin/investment-leads', label: 'Investment Leads', icon: IconBriefcase },
+  { to: '/admin/contact-leads', label: 'Contact Leads', icon: IconMail },
+  { to: '/admin/broadcast', label: 'Email Broadcast', icon: IconMail },
 ]
 
 interface ShellProps {
