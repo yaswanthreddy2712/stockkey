@@ -139,14 +139,14 @@ app.post('/api/auth/login', async (req, res) => {
 
 app.post('/api/auth/register', async (req, res) => {
   try {
-    const { name, email, password, phone, aadhaar, plan } = req.body
+    const { name, email, password, phone, aadhaar, pan, plan } = req.body
     if (!name || !email || !password || !phone) return res.status(400).json({ ok: false, error: 'Missing required fields.' })
     if (await User.findOne({ email: email.toLowerCase() })) return res.status(409).json({ ok: false, error: 'Account with this email exists.' })
     const planMonthly = plan === 'Premium' ? 120000 : plan === 'Standard' ? 60000 : 12000
     const planInvest = plan === 'Premium' ? 1000000 : plan === 'Standard' ? 500000 : 100000
     const now = new Date().toISOString()
     const cid = `cust_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
-    const customer = await Customer.create({ _id: cid, name, email: email.toLowerCase(), phone, aadhaar: aadhaar || '', pan: 'PENDING', plan, investedAmount: planInvest, monthlyPayout: planMonthly, joinDate: now, status: 'Pending', kycVerified: false, address: '', dateOfBirth: '', holdings: [], transactions: [{ _id: `t_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, date: now, type: 'Investment', description: `Enquiry — ${plan} Plan`, amount: 0 }] })
+    const customer = await Customer.create({ _id: cid, name, email: email.toLowerCase(), phone, aadhaar: aadhaar || '', pan: pan || 'PENDING', plan, investedAmount: planInvest, monthlyPayout: planMonthly, joinDate: now, status: 'Pending', kycVerified: false, address: '', dateOfBirth: '', photo: '', holdings: [], transactions: [{ _id: `t_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, date: now, type: 'Investment', description: `Enquiry — ${plan} Plan`, amount: 0 }] })
     const uid = `user_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
     const user = await User.create({ _id: uid, name, email: email.toLowerCase(), password, role: 'customer', customerId: customer._id, createdAt: now })
     res.status(201).json({ ok: true, user: { id: user._id, name: user.name, email: user.email, role: user.role, customerId: user.customerId, createdAt: user.createdAt } })

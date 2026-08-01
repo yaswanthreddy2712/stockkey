@@ -61,6 +61,9 @@ export default function AdminCustomers() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    if (!form.photo && !editingId) { alert('Please upload a customer photo — it is mandatory for the certificate.'); return }
+    if (!form.aadhaar) { alert('Aadhaar number is mandatory.'); return }
+    if (!form.pan) { alert('PAN number is mandatory.'); return }
     if (editingId) {
       updateCustomer(editingId, form)
     } else {
@@ -150,12 +153,12 @@ export default function AdminCustomers() {
               {form.photo ? (
                 <img src={form.photo} alt="Preview" className="h-16 w-16 rounded-xl object-cover border border-ink-200" />
               ) : (
-                <div className="h-16 w-16 rounded-xl bg-ink-50 border border-ink-200 flex items-center justify-center text-xl font-bold text-ink-300">{form.name.charAt(0) || '?'}</div>
+                <div className="h-16 w-16 rounded-xl bg-red-50 border-2 border-dashed border-red-300 flex items-center justify-center text-xl font-bold text-red-300">?</div>
               )}
               <div>
-                <button type="button" onClick={() => photoRef.current?.click()} className="btn-outline text-xs">Upload Photo</button>
+                <button type="button" onClick={() => photoRef.current?.click()} className="btn-outline text-xs">Upload Photo <span className="text-red-500">*</span></button>
                 <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
-                <p className="text-[10px] text-ink-400 mt-1">Required for certificate</p>
+                <p className="text-[10px] text-red-500 mt-1 font-medium">Mandatory — required for certificate</p>
               </div>
             </div>
             <div><label className="label">Full Name *</label><input className="input" required value={form.name} onChange={(e) => set('name', e.target.value)} /></div>

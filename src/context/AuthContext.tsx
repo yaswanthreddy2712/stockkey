@@ -10,6 +10,7 @@ interface RegisterInput {
   password: string
   phone: string
   aadhaar: string
+  pan: string
   plan: 'Premium' | 'Standard' | 'Customised'
 }
 
