@@ -70,12 +70,12 @@ export default function AdminBroadcast() {
         <div className={`h-3 w-3 rounded-full ${smtpConfigured ? 'bg-emerald-500' : 'bg-amber-500'}`} />
         <div>
           <p className="text-sm font-semibold text-ink-800">
-            {smtpConfigured === null ? 'Checking SMTP...' : smtpConfigured ? 'SMTP Configured' : 'SMTP Not Configured'}
+            {smtpConfigured === null ? 'Checking SMTP...' : smtpConfigured ? 'Gmail SMTP — Active' : 'SMTP Not Configured'}
           </p>
           {smtpConfigured && <p className="text-xs text-ink-400">{smtpHost} &middot; {smtpUser}</p>}
           {!smtpConfigured && smtpConfigured !== null && (
             <p className="text-xs text-ink-500 mt-1">
-              Add SMTP env vars to Vercel: <code className="bg-ink-100 px-1 rounded text-ink-700">SMTP_HOST</code>, <code className="bg-ink-100 px-1 rounded text-ink-700">SMTP_PORT</code>, <code className="bg-ink-100 px-1 rounded text-ink-700">SMTP_USER</code>, <code className="bg-ink-100 px-1 rounded text-ink-700">SMTP_PASS</code>
+              Add SMTP env vars to Vercel settings.
             </p>
           )}
         </div>
@@ -158,17 +158,11 @@ export default function AdminBroadcast() {
             </div>
           ))}
           <div className="premium-card p-5 border-l-4 border-gold-500">
-            <h4 className="font-bold text-ink-800 mb-2">SMTP Setup Instructions</h4>
+            <h4 className="font-bold text-ink-800 mb-2">Email Service — Gmail SMTP</h4>
             <div className="text-sm text-ink-600 space-y-2">
-              <p>Add these environment variables in your <strong>Vercel Dashboard → Settings → Environment Variables</strong>:</p>
-              <div className="bg-ink-50 rounded-lg p-3 font-mono text-xs space-y-1">
-                <p><span className="text-ink-400">SMTP_HOST</span>=smtp.gmail.com</p>
-                <p><span className="text-ink-400">SMTP_PORT</span>=587</p>
-                <p><span className="text-ink-400">SMTP_USER</span>=your-email@gmail.com</p>
-                <p><span className="text-ink-400">SMTP_PASS</span>=your-app-password</p>
-              </div>
-              <p className="text-xs text-ink-400">For Gmail, use an <strong>App Password</strong> (not your regular password). Generate one at <a href="https://myaccount.google.com/apppasswords" target="_blank" className="text-gold-600 underline">myaccount.google.com/apppasswords</a></p>
-              <p className="text-xs text-ink-400">For other providers: Use your SMTP credentials from Zoho, Outlook, Amazon SES, etc.</p>
+              <p>Emails are sent via <strong>Gmail SMTP</strong> with an App Password.</p>
+              <p className="text-xs text-ink-400">Tip: Ask recipients to mark emails as "Not Spam" on first receive to ensure future delivery to inbox.</p>
+              <p className="text-xs text-ink-400">For better deliverability, consider verifying a domain at <a href="https://resend.com/domains" target="_blank" className="text-gold-600 underline">resend.com</a> later.</p>
             </div>
           </div>
         </div>

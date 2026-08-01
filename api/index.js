@@ -228,7 +228,7 @@ app.get('/api/stocks', async (_req, res) => {
   try { res.json(await StockPrice.find()) } catch { res.status(500).json({ error: 'Server error.' }) }
 })
 
-// ─── EMAIL SERVICE ─────────────────────────────────────────────────────
+// ─── EMAIL SERVICE (Gmail SMTP) ────────────────────────────────────────
 
 function createTransporter() {
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env
@@ -245,31 +245,26 @@ const emailTemplates = {
   welcome: (name, email) => ({
     subject: `Welcome to Stock Key Investments, ${name}!`,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
-        <div style="background: linear-gradient(135deg, #1a1f2e 0%, #0d1117 100%); padding: 32px; text-align: center;">
-          <h1 style="color: #D4AF37; margin: 0; font-size: 24px;">Stock Key Investments</h1>
-          <p style="color: #9ca3af; margin: 8px 0 0;">SEBI Registered · NISM-Certified Experts</p>
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;">
+        <div style="background:linear-gradient(135deg,#1a1f2e 0%,#0d1117 100%);padding:32px;text-align:center;">
+          <h1 style="color:#D4AF37;margin:0;font-size:24px;">Stock Key Investments</h1>
+          <p style="color:#9ca3af;margin:8px 0 0;">SEBI Registered · NISM-Certified Experts</p>
         </div>
-        <div style="padding: 32px;">
-          <h2 style="color: #1a1f2e; margin: 0 0 16px;">Welcome, ${name}! 🎉</h2>
-          <p style="color: #475569; line-height: 1.6;">
-            Your account has been created successfully. You're now part of the Stock Key Investments family.
-          </p>
-          <div style="background: #f8f9fa; border-left: 4px solid #D4AF37; padding: 16px; margin: 20px 0; border-radius: 4px;">
-            <p style="margin: 0; color: #475569;"><strong>Account Email:</strong> ${email}</p>
-            <p style="margin: 8px 0 0; color: #475569;">You can now log in to view your investment plans and portfolio.</p>
+        <div style="padding:32px;">
+          <h2 style="color:#1a1f2e;margin:0 0 16px;">Welcome, ${name}!</h2>
+          <p style="color:#475569;line-height:1.6;">Your account has been created successfully. You're now part of the Stock Key Investments family.</p>
+          <div style="background:#f8f9fa;border-left:4px solid #D4AF37;padding:16px;margin:20px 0;border-radius:4px;">
+            <p style="margin:0;color:#475569;"><strong>Account Email:</strong> ${email}</p>
+            <p style="margin:8px 0 0;color:#475569;">You can now log in to view your investment plans and portfolio.</p>
           </div>
-          <p style="color: #475569; line-height: 1.6;">
-            Our team will verify your payment and activate your account shortly. 
-            You'll receive another email once your account is fully active.
-          </p>
-          <div style="text-align: center; margin: 28px 0;">
-            <a href="https://stock-sigma-seven.vercel.app/login" style="background: #D4AF37; color: #1a1f2e; padding: 12px 32px; text-decoration: none; border-radius: 8px; font-weight: bold;">Login to Dashboard</a>
+          <p style="color:#475569;line-height:1.6;">Our team will verify your payment and activate your account shortly.</p>
+          <div style="text-align:center;margin:28px 0;">
+            <a href="https://stock-sigma-seven.vercel.app/login" style="background:#D4AF37;color:#1a1f2e;padding:12px 32px;text-decoration:none;border-radius:8px;font-weight:bold;">Login to Dashboard</a>
           </div>
         </div>
-        <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
-          <p style="color: #9ca3af; font-size: 12px; margin: 0;">Stock Key Investments · SEBI Registered · NISM-Certified Experts</p>
-          <p style="color: #9ca3af; font-size: 12px; margin: 4px 0 0;">Need help? Contact us at <a href="tel:+917013178382" style="color: #D4AF37;">+91 70131 78382</a></p>
+        <div style="background:#f8f9fa;padding:20px;text-align:center;border-top:1px solid #e5e7eb;">
+          <p style="color:#9ca3af;font-size:12px;margin:0;">Stock Key Investments · SEBI Registered · NISM-Certified Experts</p>
+          <p style="color:#9ca3af;font-size:12px;margin:4px 0 0;">Need help? Call <a href="tel:+917013178382" style="color:#D4AF37;">+91 70131 78382</a></p>
         </div>
       </div>
     `,
@@ -278,24 +273,22 @@ const emailTemplates = {
   paymentVerified: (name) => ({
     subject: `Payment Verified — Your Investment is Active!`,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
-        <div style="background: linear-gradient(135deg, #1a1f2e 0%, #0d1117 100%); padding: 32px; text-align: center;">
-          <h1 style="color: #D4AF37; margin: 0; font-size: 24px;">Stock Key Investments</h1>
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;">
+        <div style="background:linear-gradient(135deg,#1a1f2e 0%,#0d1117 100%);padding:32px;text-align:center;">
+          <h1 style="color:#D4AF37;margin:0;font-size:24px;">Stock Key Investments</h1>
         </div>
-        <div style="padding: 32px;">
-          <h2 style="color: #16a34a; margin: 0 0 16px;">Payment Verified ✅</h2>
-          <p style="color: #475569; line-height: 1.6;">
-            Hi ${name}, your investment payment has been verified and your account is now <strong>Active</strong>.
-          </p>
-          <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 16px; margin: 20px 0; border-radius: 4px;">
-            <p style="margin: 0; color: #166534;">Your monthly payouts will begin as per your investment plan. You can track everything from your dashboard.</p>
+        <div style="padding:32px;">
+          <h2 style="color:#16a34a;margin:0 0 16px;">Payment Verified</h2>
+          <p style="color:#475569;line-height:1.6;">Hi ${name}, your investment payment has been verified and your account is now <strong>Active</strong>.</p>
+          <div style="background:#f0fdf4;border-left:4px solid #16a34a;padding:16px;margin:20px 0;border-radius:4px;">
+            <p style="margin:0;color:#166534;">Your monthly payouts will begin as per your investment plan. Track everything from your dashboard.</p>
           </div>
-          <div style="text-align: center; margin: 28px 0;">
-            <a href="https://stock-sigma-seven.vercel.app/dashboard" style="background: #D4AF37; color: #1a1f2e; padding: 12px 32px; text-decoration: none; border-radius: 8px; font-weight: bold;">View Dashboard</a>
+          <div style="text-align:center;margin:28px 0;">
+            <a href="https://stock-sigma-seven.vercel.app/dashboard" style="background:#D4AF37;color:#1a1f2e;padding:12px 32px;text-decoration:none;border-radius:8px;font-weight:bold;">View Dashboard</a>
           </div>
         </div>
-        <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
-          <p style="color: #9ca3af; font-size: 12px; margin: 0;">Stock Key Investments · SEBI Registered · NISM-Certified Experts</p>
+        <div style="background:#f8f9fa;padding:20px;text-align:center;border-top:1px solid #e5e7eb;">
+          <p style="color:#9ca3af;font-size:12px;margin:0;">Stock Key Investments · SEBI Registered · NISM-Certified Experts</p>
         </div>
       </div>
     `,
@@ -304,21 +297,19 @@ const emailTemplates = {
   paymentRejected: (name) => ({
     subject: `Payment Verification Issue — Action Required`,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
-        <div style="background: linear-gradient(135deg, #1a1f2e 0%, #0d1117 100%); padding: 32px; text-align: center;">
-          <h1 style="color: #D4AF37; margin: 0; font-size: 24px;">Stock Key Investments</h1>
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;">
+        <div style="background:linear-gradient(135deg,#1a1f2e 0%,#0d1117 100%);padding:32px;text-align:center;">
+          <h1 style="color:#D4AF37;margin:0;font-size:24px;">Stock Key Investments</h1>
         </div>
-        <div style="padding: 32px;">
-          <h2 style="color: #dc2626; margin: 0 0 16px;">Payment Verification Needed</h2>
-          <p style="color: #475569; line-height: 1.6;">
-            Hi ${name}, we were unable to verify your payment. Please contact our support team to resolve this.
-          </p>
-          <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 16px; margin: 20px 0; border-radius: 4px;">
-            <p style="margin: 0; color: #991b1b;">Please call us at <strong>+91 70131 78382</strong> or reply to this email with your payment proof (screenshot/UTR number).</p>
+        <div style="padding:32px;">
+          <h2 style="color:#dc2626;margin:0 0 16px;">Payment Verification Needed</h2>
+          <p style="color:#475569;line-height:1.6;">Hi ${name}, we were unable to verify your payment. Please contact our support team.</p>
+          <div style="background:#fef2f2;border-left:4px solid #dc2626;padding:16px;margin:20px 0;border-radius:4px;">
+            <p style="margin:0;color:#991b1b;">Please call <strong>+91 70131 78382</strong> or reply with your payment proof (screenshot/UTR number).</p>
           </div>
         </div>
-        <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
-          <p style="color: #9ca3af; font-size: 12px; margin: 0;">Stock Key Investments · SEBI Registered · NISM-Certified Experts</p>
+        <div style="background:#f8f9fa;padding:20px;text-align:center;border-top:1px solid #e5e7eb;">
+          <p style="color:#9ca3af;font-size:12px;margin:0;">Stock Key Investments · SEBI Registered · NISM-Certified Experts</p>
         </div>
       </div>
     `,
@@ -327,25 +318,23 @@ const emailTemplates = {
   monthlyPayout: (name, amount) => ({
     subject: `Monthly Payout of ₹${Number(amount).toLocaleString('en-IN')} Credited!`,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
-        <div style="background: linear-gradient(135deg, #1a1f2e 0%, #0d1117 100%); padding: 32px; text-align: center;">
-          <h1 style="color: #D4AF37; margin: 0; font-size: 24px;">Stock Key Investments</h1>
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;">
+        <div style="background:linear-gradient(135deg,#1a1f2e 0%,#0d1117 100%);padding:32px;text-align:center;">
+          <h1 style="color:#D4AF37;margin:0;font-size:24px;">Stock Key Investments</h1>
         </div>
-        <div style="padding: 32px;">
-          <h2 style="color: #16a34a; margin: 0 0 16px;">Monthly Payout Credited 💰</h2>
-          <p style="color: #475569; line-height: 1.6;">
-            Hi ${name}, your monthly investment payout has been credited to your account.
-          </p>
-          <div style="text-align: center; margin: 28px 0; padding: 24px; background: #f0fdf4; border-radius: 12px;">
-            <p style="color: #166534; margin: 0; font-size: 14px;">Amount Credited</p>
-            <p style="color: #16a34a; margin: 8px 0 0; font-size: 32px; font-weight: bold;">₹${Number(amount).toLocaleString('en-IN')}</p>
+        <div style="padding:32px;">
+          <h2 style="color:#16a34a;margin:0 0 16px;">Monthly Payout Credited!</h2>
+          <p style="color:#475569;line-height:1.6;">Hi ${name}, your monthly investment payout has been credited.</p>
+          <div style="text-align:center;margin:28px 0;padding:24px;background:#f0fdf4;border-radius:12px;">
+            <p style="color:#166534;margin:0;font-size:14px;">Amount Credited</p>
+            <p style="color:#16a34a;margin:8px 0 0;font-size:32px;font-weight:bold;">₹${Number(amount).toLocaleString('en-IN')}</p>
           </div>
-          <div style="text-align: center; margin: 28px 0;">
-            <a href="https://stock-sigma-seven.vercel.app/dashboard" style="background: #D4AF37; color: #1a1f2e; padding: 12px 32px; text-decoration: none; border-radius: 8px; font-weight: bold;">View Dashboard</a>
+          <div style="text-align:center;margin:28px 0;">
+            <a href="https://stock-sigma-seven.vercel.app/dashboard" style="background:#D4AF37;color:#1a1f2e;padding:12px 32px;text-decoration:none;border-radius:8px;font-weight:bold;">View Dashboard</a>
           </div>
         </div>
-        <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
-          <p style="color: #9ca3af; font-size: 12px; margin: 0;">Stock Key Investments · SEBI Registered · NISM-Certified Experts</p>
+        <div style="background:#f8f9fa;padding:20px;text-align:center;border-top:1px solid #e5e7eb;">
+          <p style="color:#9ca3af;font-size:12px;margin:0;">Stock Key Investments · SEBI Registered · NISM-Certified Experts</p>
         </div>
       </div>
     `,
@@ -354,17 +343,17 @@ const emailTemplates = {
   broadcast: (name, subject, body) => ({
     subject,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
-        <div style="background: linear-gradient(135deg, #1a1f2e 0%, #0d1117 100%); padding: 32px; text-align: center;">
-          <h1 style="color: #D4AF37; margin: 0; font-size: 24px;">Stock Key Investments</h1>
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;">
+        <div style="background:linear-gradient(135deg,#1a1f2e 0%,#0d1117 100%);padding:32px;text-align:center;">
+          <h1 style="color:#D4AF37;margin:0;font-size:24px;">Stock Key Investments</h1>
         </div>
-        <div style="padding: 32px;">
-          <p style="color: #475569; line-height: 1.6;">Hi ${name},</p>
-          <div style="color: #475569; line-height: 1.8; white-space: pre-wrap;">${body}</div>
+        <div style="padding:32px;">
+          <p style="color:#475569;line-height:1.6;">Hi ${name},</p>
+          <div style="color:#475569;line-height:1.8;white-space:pre-wrap;">${body}</div>
         </div>
-        <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
-          <p style="color: #9ca3af; font-size: 12px; margin: 0;">Stock Key Investments · SEBI Registered · NISM-Certified Experts</p>
-          <p style="color: #9ca3af; font-size: 12px; margin: 4px 0 0;">Need help? Contact us at <a href="tel:+917013178382" style="color: #D4AF37;">+91 70131 78382</a></p>
+        <div style="background:#f8f9fa;padding:20px;text-align:center;border-top:1px solid #e5e7eb;">
+          <p style="color:#9ca3af;font-size:12px;margin:0;">Stock Key Investments · SEBI Registered · NISM-Certified Experts</p>
+          <p style="color:#9ca3af;font-size:12px;margin:4px 0 0;">Call <a href="tel:+917013178382" style="color:#D4AF37;">+91 70131 78382</a></p>
         </div>
       </div>
     `,
@@ -377,7 +366,7 @@ app.post('/api/email/send', async (req, res) => {
     const { to, template, data } = req.body
     if (!to || !template) return res.status(400).json({ error: 'Missing required fields.' })
     const transporter = createTransporter()
-    if (!transporter) return res.status(503).json({ error: 'Email not configured. Set SMTP_HOST, SMTP_USER, SMTP_PASS env vars.' })
+    if (!transporter) return res.status(503).json({ error: 'Email not configured. Set SMTP env vars.' })
 
     let emailContent
     switch (template) {
@@ -387,7 +376,7 @@ app.post('/api/email/send', async (req, res) => {
       case 'monthlyPayout': emailContent = emailTemplates.monthlyPayout(data?.name || 'Investor', data?.amount || 0); break
       default: return res.status(400).json({ error: 'Unknown template.' })
     }
-    await transporter.sendMail({ from: `"Stock Key Investments" <${process.env.SMTP_USER}>`, to, subject: emailContent.subject, html: emailContent.html })
+    await transporter.sendMail({ from: `"Stock Key Investments" <${process.env.SMTP_USER}>`, to, subject: emailContent.subject, html: emailContent.html, headers: { 'X-Mailer': 'StockKeyMailer', 'List-Unsubscribe': `<mailto:${process.env.SMTP_USER}?subject=unsubscribe>` } })
     res.json({ ok: true, message: `Email sent to ${to}` })
   } catch (err) { console.error('Email error:', err.message); res.status(500).json({ error: 'Failed to send email.' }) }
 })
@@ -397,7 +386,7 @@ app.post('/api/email/broadcast', async (req, res) => {
     const { subject, body, audience } = req.body
     if (!subject || !body) return res.status(400).json({ error: 'Subject and body are required.' })
     const transporter = createTransporter()
-    if (!transporter) return res.status(503).json({ error: 'Email not configured. Set SMTP_HOST, SMTP_USER, SMTP_PASS env vars.' })
+    if (!transporter) return res.status(503).json({ error: 'Email not configured. Set SMTP env vars.' })
 
     let filter = {}
     if (audience === 'Active') filter.status = 'Active'
@@ -409,9 +398,9 @@ app.post('/api/email/broadcast', async (req, res) => {
     for (const c of customers) {
       try {
         const content = emailTemplates.broadcast(c.name, subject, body)
-        await transporter.sendMail({ from: `"Stock Key Investments" <${process.env.SMTP_USER}>`, to: c.email, subject: content.subject, html: content.html })
+        await transporter.sendMail({ from: `"Stock Key Investments" <${process.env.SMTP_USER}>`, to: c.email, subject: content.subject, html: content.html, headers: { 'X-Mailer': 'StockKeyMailer', 'List-Unsubscribe': `<mailto:${process.env.SMTP_USER}?subject=unsubscribe>` } })
         sent++
-      } catch { failed++ }
+      } catch (e) { console.error('Broadcast send error:', e.message); failed++ }
     }
     res.json({ ok: true, sent, failed, total: customers.length })
   } catch (err) { console.error('Broadcast error:', err.message); res.status(500).json({ error: 'Failed to broadcast.' }) }
