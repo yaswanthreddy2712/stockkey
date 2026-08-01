@@ -10,7 +10,7 @@ interface DataContextValue {
   messages: ContactMessage[]
 
   getCustomer: (id: string) => Customer | undefined
-  addCustomer: (c: Omit<Customer, 'id'>) => Customer
+  addCustomer: (c: Omit<Customer, 'id'>) => Promise<Customer>
   updateCustomer: (id: string, patch: Partial<Customer>) => void
   deleteCustomer: (id: string) => void
 
@@ -61,11 +61,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const getCustomer = (id: string) => customers.find((c) => c.id === id)
 
-  const addCustomer = (c: Omit<Customer, 'id'>): Customer => {
-    // Optimistic local update; actual persist happens via API
-    // For now we keep it synchronous for components that expect a return value
-    const temp: any = { ...c, id: `temp_${Date.now()}` }
-    return temp
+  const addCustomer = async (c: Omit<Customer, 'id'>): Promise<Customer> => {
+    try {
+      const created = await api.addCustomer(c)
+      setCustomers((prev) => [created, ...prev])
+      return created
+    } catch (err) {
+      console.error('Failed to add customer:', err)
+      throw err
+    }
   }
 
   const updateCustomer = async (id: string, patch: Partial<Customer>) => {

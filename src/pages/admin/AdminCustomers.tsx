@@ -59,15 +59,15 @@ export default function AdminCustomers() {
     reader.readAsDataURL(file)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.photo && !editingId) { alert('Please upload a customer photo — it is mandatory for the certificate.'); return }
     if (!form.aadhaar) { alert('Aadhaar number is mandatory.'); return }
     if (!form.pan) { alert('PAN number is mandatory.'); return }
     if (editingId) {
-      updateCustomer(editingId, form)
+      await updateCustomer(editingId, form)
     } else {
-      addCustomer(form)
+      await addCustomer(form)
     }
     setModalOpen(false)
   }
