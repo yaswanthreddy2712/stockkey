@@ -1,22 +1,23 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import DashboardShell from '../../components/DashboardShell'
 import { useData } from '../../context/DataContext'
 import Badge, { statusColor } from '../../components/ui/Badge'
 import Modal from '../../components/ui/Modal'
-import { inr, formatDate, holdingValue, newId } from '../../lib/utils'
-import { IconEdit, IconTrash, IconUsers, IconCheck } from '../../components/icons'
+import InvestmentCertificate from '../../components/InvestmentCertificate'
+import { inr, formatDate, holdingValue } from '../../lib/utils'
+import { IconEdit, IconTrash, IconCheck, IconDownload } from '../../components/icons'
 import type { Customer, InvestmentPlanTier } from '../../types'
 
 const emptyCustomer = (): Omit<Customer, 'id'> => ({
   name: '', email: '', phone: '', aadhaar: '', pan: '', plan: 'Standard',
-  investedAmount: 500000, monthlyPayout: 20000, joinDate: new Date().toISOString(),
-  status: 'Pending', kycVerified: false, address: '', dateOfBirth: '', holdings: [], transactions: [],
+  investedAmount: 500000, monthlyPayout: 60000, joinDate: new Date().toISOString(),
+  status: 'Pending', kycVerified: false, address: '', dateOfBirth: '', photo: '', holdings: [], transactions: [],
 })
 
 const planDefaults: Record<InvestmentPlanTier, { invested: number; payout: number }> = {
-  Premium: { invested: 1000000, payout: 40000 },
-  Standard: { invested: 500000, payout: 20000 },
-  Customised: { invested: 100000, payout: 10000 },
+  Premium: { invested: 1000000, payout: 120000 },
+  Standard: { invested: 500000, payout: 60000 },
+  Customised: { invested: 100000, payout: 12000 },
 }
 
 export default function AdminCustomers() {
@@ -27,6 +28,8 @@ export default function AdminCustomers() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<Omit<Customer, 'id'>>(emptyCustomer())
   const [viewing, setViewing] = useState<Customer | null>(null)
+  const [certCustomer, setCertCustomer] = useState<Customer | null>(null)
+  const photoRef = useRef<HTMLInputElement>(null)
 
   const filtered = useMemo(() => customers.filter((c) => {
     const matchesSearch = (c.name + c.email + c.phone).toLowerCase().includes(search.toLowerCase())
@@ -46,6 +49,14 @@ export default function AdminCustomers() {
   const onPlanChange = (plan: InvestmentPlanTier) => {
     const d = planDefaults[plan]
     setForm((f) => ({ ...f, plan, investedAmount: d.invested, monthlyPayout: d.payout }))
+  }
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => setForm((f) => ({ ...f, photo: ev.target?.result as string }))
+    reader.readAsDataURL(file)
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -135,12 +146,24 @@ export default function AdminCustomers() {
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editingId ? 'Edit Customer' : 'Add Customer'} size="lg">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2 flex items-center gap-4">
+              {form.photo ? (
+                <img src={form.photo} alt="Preview" className="h-16 w-16 rounded-xl object-cover border border-ink-200" />
+              ) : (
+                <div className="h-16 w-16 rounded-xl bg-ink-50 border border-ink-200 flex items-center justify-center text-xl font-bold text-ink-300">{form.name.charAt(0) || '?'}</div>
+              )}
+              <div>
+                <button type="button" onClick={() => photoRef.current?.click()} className="btn-outline text-xs">Upload Photo</button>
+                <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
+                <p className="text-[10px] text-ink-400 mt-1">Required for certificate</p>
+              </div>
+            </div>
             <div><label className="label">Full Name *</label><input className="input" required value={form.name} onChange={(e) => set('name', e.target.value)} /></div>
             <div><label className="label">Email *</label><input className="input" type="email" required value={form.email} onChange={(e) => set('email', e.target.value)} /></div>
             <div><label className="label">Phone *</label><input className="input" required value={form.phone} onChange={(e) => set('phone', e.target.value)} /></div>
             <div><label className="label">Date of Birth</label><input className="input" type="date" value={form.dateOfBirth.slice(0, 10)} onChange={(e) => set('dateOfBirth', e.target.value)} /></div>
-            <div><label className="label">Aadhaar</label><input className="input" value={form.aadhaar} onChange={(e) => set('aadhaar', e.target.value)} /></div>
-            <div><label className="label">PAN</label><input className="input" value={form.pan} onChange={(e) => set('pan', e.target.value)} /></div>
+            <div><label className="label">Aadhaar Number *</label><input className="input" required value={form.aadhaar} onChange={(e) => set('aadhaar', e.target.value)} placeholder="XXXX-XXXX-1234" /></div>
+            <div><label className="label">PAN Number *</label><input className="input" required value={form.pan} onChange={(e) => set('pan', e.target.value)} placeholder="ABCDE1234F" /></div>
             <div>
               <label className="label">Plan</label>
               <select className="input" value={form.plan} onChange={(e) => onPlanChange(e.target.value as InvestmentPlanTier)}>
@@ -173,7 +196,11 @@ export default function AdminCustomers() {
         {viewing && (
           <div className="space-y-3 text-sm">
             <div className="flex items-center gap-3 pb-3 border-b border-ink-100">
-              <div className="grid h-12 w-12 place-items-center rounded-full bg-gold-50 text-gold-600 text-lg font-bold">{viewing.name.charAt(0)}</div>
+              {viewing.photo ? (
+                <img src={viewing.photo} alt={viewing.name} className="h-12 w-12 rounded-full object-cover border border-ink-200" />
+              ) : (
+                <div className="grid h-12 w-12 place-items-center rounded-full bg-gold-50 text-gold-600 text-lg font-bold">{viewing.name.charAt(0)}</div>
+              )}
               <div>
                 <p className="font-bold text-ink-800">{viewing.name}</p>
                 <p className="text-ink-500">{viewing.email} &middot; {viewing.phone}</p>
@@ -198,8 +225,18 @@ export default function AdminCustomers() {
                 </div>
               </div>
             )}
+            <div className="pt-3 border-t border-ink-100">
+              <button onClick={() => { setCertCustomer(viewing); setViewing(null) }} className="btn-gold text-sm w-full flex items-center justify-center gap-2">
+                <IconDownload className="h-4 w-4" /> Generate Investment Certificate
+              </button>
+            </div>
           </div>
         )}
+      </Modal>
+
+      {/* Certificate modal */}
+      <Modal open={!!certCustomer} onClose={() => setCertCustomer(null)} title="Investment Certificate" size="xl">
+        {certCustomer && <InvestmentCertificate customer={certCustomer} />}
       </Modal>
     </DashboardShell>
   )

@@ -5,10 +5,10 @@ interface ModalProps {
   onClose: () => void
   title?: string
   children: ReactNode
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg' | 'xl'
 }
 
-const sizes = { sm: 'max-w-md', md: 'max-w-lg', lg: 'max-w-3xl' }
+const sizes = { sm: 'max-w-md', md: 'max-w-lg', lg: 'max-w-3xl', xl: 'max-w-5xl' }
 
 export default function Modal({ open, onClose, title, children, size = 'md' }: ModalProps) {
   if (!open) return null

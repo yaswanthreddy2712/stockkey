@@ -40,6 +40,7 @@ const Customer = mongoose.model('Customer', new mongoose.Schema({
   kycVerified: { type: Boolean, default: false },
   address: { type: String, default: '' },
   dateOfBirth: { type: String, default: '' },
+  photo: { type: String, default: '' },
   holdings: [{
     _id: { type: String, required: true },
     symbol: String, name: String,

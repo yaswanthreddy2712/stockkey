@@ -49,6 +49,7 @@ export interface Customer {
   kycVerified: boolean
   address: string
   dateOfBirth: string
+  photo?: string
   holdings: Holding[]
   transactions: Transaction[]
 }
