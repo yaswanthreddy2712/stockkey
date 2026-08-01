@@ -11,7 +11,9 @@ import type { Customer, InvestmentPlanTier } from '../../types'
 const emptyCustomer = (): Omit<Customer, 'id'> => ({
   name: '', email: '', phone: '', aadhaar: '', pan: '', plan: 'Standard',
   investedAmount: 500000, monthlyPayout: 60000, joinDate: new Date().toISOString(),
-  status: 'Pending', kycVerified: false, address: '', dateOfBirth: '', photo: '', holdings: [], transactions: [],
+  status: 'Pending', kycVerified: false, address: '', dateOfBirth: '', photo: '',
+  paymentMethod: 'UPI (GPay/PhonePe/Paytm)', utrNumber: '', referenceNo: '',
+  holdings: [], transactions: [],
 })
 
 const planDefaults: Record<InvestmentPlanTier, { invested: number; payout: number }> = {
@@ -78,6 +80,7 @@ export default function AdminCustomers() {
     if (!form.photo && !editingId) { setSubmitError('Please upload a customer photo — it is mandatory for the certificate.'); return }
     if (!form.aadhaar) { setSubmitError('Aadhaar number is mandatory.'); return }
     if (!form.pan) { setSubmitError('PAN number is mandatory.'); return }
+    if (!form.utrNumber) { setSubmitError('UTR / Transaction number is mandatory.'); return }
     try {
       if (editingId) {
         await updateCustomer(editingId, form)
@@ -201,6 +204,17 @@ export default function AdminCustomers() {
             <div><label className="label">Invested Amount (₹)</label><input className="input" type="number" value={form.investedAmount} onChange={(e) => set('investedAmount', Number(e.target.value))} /></div>
             <div><label className="label">Monthly Payout (₹)</label><input className="input" type="number" value={form.monthlyPayout} onChange={(e) => set('monthlyPayout', Number(e.target.value))} /></div>
             <div className="sm:col-span-2"><label className="label">Address</label><input className="input" value={form.address} onChange={(e) => set('address', e.target.value)} /></div>
+            <div className="sm:col-span-2 border-t border-ink-100 pt-4 mt-2">
+              <p className="text-xs font-semibold text-ink-500 uppercase tracking-wide mb-3">Payment Details</p>
+            </div>
+            <div>
+              <label className="label">Payment Method *</label>
+              <select className="input" required value={form.paymentMethod} onChange={(e) => set('paymentMethod', e.target.value as any)}>
+                {(['UPI (GPay/PhonePe/Paytm)', 'Bank Transfer / NEFT / RTGS', 'Cheque', 'Cash'] as const).map((m) => <option key={m} value={m}>{m}</option>)}
+              </select>
+            </div>
+            <div><label className="label">UTR / Transaction No. *</label><input className="input" required value={form.utrNumber} onChange={(e) => set('utrNumber', e.target.value)} placeholder="e.g. 123456789012" /></div>
+            <div className="sm:col-span-2"><label className="label">Reference No. (optional)</label><input className="input" value={form.referenceNo} onChange={(e) => set('referenceNo', e.target.value)} placeholder="Bank reference, cheque no. etc." /></div>
             <div className="sm:col-span-2 flex items-center gap-2">
               <input id="kyc" type="checkbox" checked={form.kycVerified} onChange={(e) => set('kycVerified', e.target.checked)} className="h-4 w-4 rounded accent-gold-500" />
               <label htmlFor="kyc" className="text-sm text-ink-700">KYC Verified</label>
@@ -238,6 +252,12 @@ export default function AdminCustomers() {
               <div><p className="text-xs text-ink-400">Joined</p><p className="font-medium">{formatDate(viewing.joinDate)}</p></div>
               <div><p className="text-xs text-ink-400">KYC</p><p>{viewing.kycVerified ? <Badge color="green">Verified</Badge> : <Badge color="amber">Pending</Badge>}</p></div>
               <div className="col-span-2"><p className="text-xs text-ink-400">Address</p><p className="font-medium">{viewing.address || '—'}</p></div>
+              <div className="col-span-2 border-t border-ink-100 pt-3 mt-1">
+                <p className="text-xs font-semibold text-ink-500 uppercase tracking-wide mb-2">Payment Details</p>
+              </div>
+              <div><p className="text-xs text-ink-400">Payment Method</p><p className="font-medium">{viewing.paymentMethod || '—'}</p></div>
+              <div><p className="text-xs text-ink-400">UTR / Transaction No.</p><p className="font-medium tabular">{viewing.utrNumber || '—'}</p></div>
+              {viewing.referenceNo && <div><p className="text-xs text-ink-400">Reference No.</p><p className="font-medium tabular">{viewing.referenceNo}</p></div>}
             </div>
             {viewing.holdings.length > 0 && (
               <div className="pt-3 border-t border-ink-100">

@@ -12,6 +12,9 @@ interface RegisterInput {
   aadhaar: string
   pan: string
   plan: 'Premium' | 'Standard' | 'Customised'
+  paymentMethod: string
+  utrNumber: string
+  referenceNo: string
 }
 
 interface AuthContextValue {

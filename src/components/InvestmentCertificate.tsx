@@ -93,6 +93,24 @@ export default function InvestmentCertificate({ customer }: Props) {
               <p className="text-[10px] uppercase tracking-widest text-ink-400 mb-0.5">Maturity Date</p>
               <p className="font-medium text-ink-700">{formatDate(new Date(new Date(customer.joinDate).getTime() + 365 * 86400000).toISOString())}</p>
             </div>
+            {customer.paymentMethod && (
+              <>
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-ink-400 mb-0.5">Payment Method</p>
+                  <p className="font-medium text-ink-700">{customer.paymentMethod}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-ink-400 mb-0.5">UTR / Transaction No.</p>
+                  <p className="font-medium text-ink-700">{customer.utrNumber || '—'}</p>
+                </div>
+                {customer.referenceNo && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-ink-400 mb-0.5">Reference No.</p>
+                    <p className="font-medium text-ink-700">{customer.referenceNo}</p>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
 

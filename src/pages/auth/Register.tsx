@@ -18,6 +18,7 @@ export default function Register() {
   const [form, setForm] = useState({
     name: '', email: '', phone: '', aadhaar: '', pan: '', password: '', confirm: '',
     plan: 'Standard' as InvestmentPlanTier, photo: '',
+    paymentMethod: 'UPI (GPay/PhonePe/Paytm)' as string, utrNumber: '', referenceNo: '',
   })
   const photoRef = useRef<HTMLInputElement>(null)
 
@@ -37,12 +38,14 @@ export default function Register() {
     if (!form.photo) { setError('Photo is mandatory — please upload your photo.'); return }
     if (!form.aadhaar) { setError('Aadhaar number is mandatory.'); return }
     if (!form.pan) { setError('PAN number is mandatory.'); return }
+    if (!form.utrNumber) { setError('UTR / Transaction number is mandatory.'); return }
     if (form.password.length < 6) { setError('Password must be at least 6 characters.'); return }
     if (form.password !== form.confirm) { setError('Passwords do not match.'); return }
     setLoading(true)
     const res = await register({
       name: form.name, email: form.email, password: form.password,
       phone: form.phone, aadhaar: form.aadhaar, pan: form.pan, plan: form.plan,
+      paymentMethod: form.paymentMethod, utrNumber: form.utrNumber, referenceNo: form.referenceNo,
     })
     setLoading(false)
     if (!res.ok) { setError(res.error ?? 'Registration failed'); return }
@@ -139,6 +142,27 @@ export default function Register() {
               <div>
                 <label className="label">Confirm <span className="text-red-500">*</span></label>
                 <input className="input" type="password" required value={form.confirm} onChange={(e) => set('confirm', e.target.value)} placeholder="Re-enter" />
+              </div>
+            </div>
+
+            {/* Payment details */}
+            <div className="border-t border-ink-100 pt-4">
+              <p className="text-xs font-semibold text-ink-500 uppercase tracking-wide mb-3">Payment Details</p>
+            </div>
+            <div>
+              <label className="label">Payment Method <span className="text-red-500">*</span></label>
+              <select className="input" required value={form.paymentMethod} onChange={(e) => set('paymentMethod', e.target.value)}>
+                {['UPI (GPay/PhonePe/Paytm)', 'Bank Transfer / NEFT / RTGS', 'Cheque', 'Cash'].map((m) => <option key={m} value={m}>{m}</option>)}
+              </select>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="label">UTR / Transaction No. <span className="text-red-500">*</span></label>
+                <input className="input" required value={form.utrNumber} onChange={(e) => set('utrNumber', e.target.value)} placeholder="e.g. 123456789012" />
+              </div>
+              <div>
+                <label className="label">Reference No. (optional)</label>
+                <input className="input" value={form.referenceNo} onChange={(e) => set('referenceNo', e.target.value)} placeholder="Cheque / bank ref" />
               </div>
             </div>
 

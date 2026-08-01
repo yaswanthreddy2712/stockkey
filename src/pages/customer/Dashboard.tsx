@@ -95,6 +95,23 @@ export default function CustomerDashboard() {
               <span className="text-ink-400">KYC</span>
               <span>{customer.kycVerified ? <Badge color="green">Verified</Badge> : <Badge color="amber">Pending</Badge>}</span>
             </div>
+            {customer.utrNumber && (
+              <>
+                <div className="mt-2 pt-2 border-t border-white/10">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-ink-400">Payment</span><span className="text-xs">{customer.paymentMethod || '—'}</span>
+                  </div>
+                  <div className="mt-1 flex items-center justify-between text-sm">
+                    <span className="text-ink-400">UTR No.</span><span className="font-semibold tabular text-xs">{customer.utrNumber}</span>
+                  </div>
+                  {customer.referenceNo && (
+                    <div className="mt-1 flex items-center justify-between text-sm">
+                      <span className="text-ink-400">Ref No.</span><span className="font-semibold tabular text-xs">{customer.referenceNo}</span>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
 
           <div className="premium-card p-5">

@@ -34,6 +34,8 @@ export interface Transaction {
   amount: number // positive credit, negative debit
 }
 
+export type PaymentMethod = 'UPI (GPay/PhonePe/Paytm)' | 'Bank Transfer / NEFT / RTGS' | 'Cheque' | 'Cash'
+
 export interface Customer {
   id: string
   name: string
@@ -52,6 +54,9 @@ export interface Customer {
   photo?: string
   holdings: Holding[]
   transactions: Transaction[]
+  paymentMethod: PaymentMethod
+  utrNumber: string
+  referenceNo: string
 }
 
 export type InsuranceCategory = 'Health' | 'Term' | 'Car' | 'Bike'

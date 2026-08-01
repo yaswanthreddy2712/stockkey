@@ -18,7 +18,7 @@ export const api = {
     request<{ ok: boolean; user?: any; error?: string }>('/auth/login', {
       method: 'POST', body: JSON.stringify({ email, password }),
     }),
-  register: (data: { name: string; email: string; password: string; phone: string; aadhaar: string; pan: string; plan: string }) =>
+  register: (data: { name: string; email: string; password: string; phone: string; aadhaar: string; pan: string; plan: string; paymentMethod: string; utrNumber: string; referenceNo: string }) =>
     request<{ ok: boolean; user?: any; error?: string }>('/auth/register', {
       method: 'POST', body: JSON.stringify(data),
     }),

@@ -76,6 +76,17 @@ export default function CustomerProfile() {
               To update your details, please contact your advisor at <a href="tel:+917013178382" className="text-gold-600 hover:text-gold-500">+91 70131 78382</a>.
             </p>
           </div>
+
+          {customer.utrNumber && (
+            <div className="premium-card p-6">
+              <h3 className="font-bold text-ink-800 mb-4 font-display">Payment Details</h3>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <Field label="Payment Method" value={customer.paymentMethod} />
+                <Field label="UTR / Transaction No." value={customer.utrNumber} />
+                {customer.referenceNo && <Field label="Reference No." value={customer.referenceNo} />}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </DashboardShell>
