@@ -29,6 +29,7 @@ export default function AdminCustomers() {
   const [form, setForm] = useState<Omit<Customer, 'id'>>(emptyCustomer())
   const [viewing, setViewing] = useState<Customer | null>(null)
   const [certCustomer, setCertCustomer] = useState<Customer | null>(null)
+  const [submitError, setSubmitError] = useState('')
   const photoRef = useRef<HTMLInputElement>(null)
 
   const filtered = useMemo(() => customers.filter((c) => {
@@ -55,21 +56,38 @@ export default function AdminCustomers() {
     const file = e.target.files?.[0]
     if (!file) return
     const reader = new FileReader()
-    reader.onload = (ev) => setForm((f) => ({ ...f, photo: ev.target?.result as string }))
+    reader.onload = (ev) => {
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        const MAX = 300
+        let w = img.width, h = img.height
+        if (w > MAX || h > MAX) { if (w > h) { h = Math.round(h * MAX / w); w = MAX } else { w = Math.round(w * MAX / h); h = MAX } }
+        canvas.width = w; canvas.height = h
+        canvas.getContext('2d')!.drawImage(img, 0, 0, w, h)
+        setForm((f) => ({ ...f, photo: canvas.toDataURL('image/jpeg', 0.7) }))
+      }
+      img.src = ev.target?.result as string
+    }
     reader.readAsDataURL(file)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.photo && !editingId) { alert('Please upload a customer photo — it is mandatory for the certificate.'); return }
-    if (!form.aadhaar) { alert('Aadhaar number is mandatory.'); return }
-    if (!form.pan) { alert('PAN number is mandatory.'); return }
-    if (editingId) {
-      await updateCustomer(editingId, form)
-    } else {
-      await addCustomer(form)
+    setSubmitError('')
+    if (!form.photo && !editingId) { setSubmitError('Please upload a customer photo — it is mandatory for the certificate.'); return }
+    if (!form.aadhaar) { setSubmitError('Aadhaar number is mandatory.'); return }
+    if (!form.pan) { setSubmitError('PAN number is mandatory.'); return }
+    try {
+      if (editingId) {
+        await updateCustomer(editingId, form)
+      } else {
+        await addCustomer(form)
+      }
+      setModalOpen(false)
+    } catch (err: any) {
+      setSubmitError(err?.message || 'Failed to save customer. Please try again.')
     }
-    setModalOpen(false)
   }
 
   const handleDelete = (id: string) => {
@@ -148,6 +166,7 @@ export default function AdminCustomers() {
       {/* Add/Edit modal */}
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editingId ? 'Edit Customer' : 'Add Customer'} size="lg">
         <form onSubmit={handleSubmit} className="space-y-4">
+          {submitError && <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{submitError}</div>}
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2 flex items-center gap-4">
               {form.photo ? (
