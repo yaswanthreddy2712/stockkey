@@ -10,6 +10,7 @@ import InvestmentPlans from './pages/public/InvestmentPlans'
 import InsuranceHub from './pages/public/InsuranceHub'
 import InsuranceCategory from './pages/public/InsuranceCategory'
 import Contact from './pages/public/Contact'
+import AIChat from './pages/public/AIChat'
 
 // Auth
 import Login from './pages/auth/Login'
@@ -47,6 +48,7 @@ export default function App() {
         <Route path="/insurance" element={<InsuranceHub />} />
         <Route path="/insurance/:category" element={<InsuranceCategory />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/ai" element={<AIChat />} />
         <Route path="*" element={<NotFound />} />
       </Route>
 
