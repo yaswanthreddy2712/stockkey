@@ -83,7 +83,7 @@ export default function Login() {
         <div className="absolute inset-0 dot-grid opacity-[0.07]" />
         <Link to="/" className="relative z-10 flex items-center gap-2.5">
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-sky-gradient text-white shadow-lg"><IconChart className="h-5 w-5" /></span>
-          <span className="font-bold text-white font-display">Stock Key Investments</span>
+          <span className="font-bold text-white font-display">Stock Key</span>
         </Link>
         <div className="relative z-10 animate-fade-up">
           <h2 className="text-3xl font-display font-bold leading-tight text-white">
