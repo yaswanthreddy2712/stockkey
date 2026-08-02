@@ -65,8 +65,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { ok: true, user: res.user }
       }
       return { ok: false, error: res.error }
-    } catch {
-      return { ok: false, error: 'Network error. Is the server running?' }
+    } catch (err: any) {
+      return { ok: false, error: err?.message || 'Network error. Is the server running?' }
     }
   }
 
@@ -74,8 +74,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const res = await api.sendOTP(email)
       return { ok: res.ok, error: res.error, message: res.message }
-    } catch {
-      return { ok: false, error: 'Network error. Is the server running?' }
+    } catch (err: any) {
+      return { ok: false, error: err?.message || 'Network error. Is the server running?' }
     }
   }
 
@@ -83,8 +83,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const res = await api.sendRegisterOTP(email)
       return { ok: res.ok, error: res.error, message: res.message }
-    } catch {
-      return { ok: false, error: 'Network error. Is the server running?' }
+    } catch (err: any) {
+      return { ok: false, error: err?.message || 'Network error. Is the server running?' }
     }
   }
 
@@ -106,8 +106,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { ok: true, user: res.user }
       }
       return { ok: false, error: res.error }
-    } catch {
-      return { ok: false, error: 'Network error. Is the server running?' }
+    } catch (err: any) {
+      return { ok: false, error: err?.message || 'Network error. Is the server running?' }
     }
   }
 
@@ -120,8 +120,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { ok: true, user: res.user }
       }
       return { ok: false, error: res.error }
-    } catch {
-      return { ok: false, error: 'Network error. Is the server running?' }
+    } catch (err: any) {
+      return { ok: false, error: err?.message || 'Network error. Is the server running?' }
     }
   }
 

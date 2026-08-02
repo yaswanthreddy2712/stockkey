@@ -292,7 +292,25 @@ app.post('/api/auth/register', async (req, res) => {
     const planInvest = plan === 'Premium' ? 1000000 : plan === 'Standard' ? 500000 : 100000
     const now = new Date().toISOString()
     const cid = `cust_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
-    const customer = await Customer.create({ _id: cid, name, email: email.toLowerCase(), phone, aadhaar: aadhaar || '', pan: pan || 'PENDING', plan, investedAmount: planInvest, monthlyPayout: planMonthly, joinDate: now, status: 'Pending', kycVerified: false, address: '', dateOfBirth: '', photo: '', paymentMethod: paymentMethod || '', utrNumber: utrNumber || '', referenceNo: referenceNo || '', holdings: [], transactions: [{ _id: `t_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, date: now, type: 'Investment', description: `Enquiry — ${plan} Plan`, amount: 0 }] })
+    let uid_h = `h_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+    let uid_h2 = `h_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`
+    let uid_h3 = `h_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`
+    let uid_t = `t_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+    const defaultHoldings = plan === 'Premium' ? [
+      { _id: uid_h, symbol: 'RELIANCE', name: 'Reliance Industries', assetClass: 'Equity', quantity: 30, avgBuyPrice: 2650, currentPrice: 2945.6 },
+      { _id: uid_h2, symbol: 'HDFCBANK', name: 'HDFC Bank', assetClass: 'Equity', quantity: 50, avgBuyPrice: 1520, currentPrice: 1689.75 },
+      { _id: uid_h3, symbol: 'NIFTYBEES', name: 'Nippon India Nifty ETF', assetClass: 'ETF', quantity: 400, avgBuyPrice: 240, currentPrice: 268.4 },
+    ] : plan === 'Standard' ? [
+      { _id: uid_h, symbol: 'TCS', name: 'Tata Consultancy Services', assetClass: 'Equity', quantity: 15, avgBuyPrice: 3520, currentPrice: 3890.25 },
+      { _id: uid_h2, symbol: 'ICICIBANK', name: 'ICICI Bank', assetClass: 'Equity', quantity: 40, avgBuyPrice: 980, currentPrice: 1124.3 },
+    ] : [
+      { _id: uid_h, symbol: 'ITC', name: 'ITC Limited', assetClass: 'Equity', quantity: 100, avgBuyPrice: 405, currentPrice: 432.8 },
+      { _id: uid_h2, symbol: 'NIFTYBEES', name: 'Nippon India Nifty ETF', assetClass: 'ETF', quantity: 100, avgBuyPrice: 240, currentPrice: 268.4 },
+    ]
+    const defaultTransactions = [
+      { _id: uid_t, date: now, type: 'Investment', description: `Initial investment — ${plan} Plan`, amount: -planInvest },
+    ]
+    const customer = await Customer.create({ _id: cid, name, email: email.toLowerCase(), phone, aadhaar: aadhaar || '', pan: pan || 'PENDING', plan, investedAmount: planInvest, monthlyPayout: planMonthly, joinDate: now, status: 'Pending', kycVerified: false, address: '', dateOfBirth: '', photo: '', paymentMethod: paymentMethod || '', utrNumber: utrNumber || '', referenceNo: referenceNo || '', holdings: defaultHoldings, transactions: defaultTransactions })
     const uid = `user_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
     const user = await User.create({ _id: uid, name, email: email.toLowerCase(), password, role: 'customer', customerId: customer._id, createdAt: now })
     res.status(201).json({ ok: true, user: { id: user._id, name: user.name, email: user.email, role: user.role, customerId: user.customerId, createdAt: user.createdAt } })
