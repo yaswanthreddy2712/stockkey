@@ -35,7 +35,11 @@ export default function App() {
 
   return (
     <Routes>
-      {/* Public pages with full layout (navbar + footer) */}
+      {/* Auth pages — NO navbar/footer */}
+      <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to={isAdmin ? '/admin' : '/dashboard'} replace />} />
+      <Route path="/register" element={!isAuthenticated ? <Register /> : <Navigate to={isAdmin ? '/admin' : '/dashboard'} replace />} />
+
+      {/* Public pages with navbar + footer */}
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
@@ -43,14 +47,6 @@ export default function App() {
         <Route path="/insurance" element={<InsuranceHub />} />
         <Route path="/insurance/:category" element={<InsuranceCategory />} />
         <Route path="/contact" element={<Contact />} />
-        <Route
-          path="/login"
-          element={!isAuthenticated ? <Login /> : <Navigate to={isAdmin ? '/admin' : '/dashboard'} replace />}
-        />
-        <Route
-          path="/register"
-          element={!isAuthenticated ? <Register /> : <Navigate to={isAdmin ? '/admin' : '/dashboard'} replace />}
-        />
         <Route path="*" element={<NotFound />} />
       </Route>
 

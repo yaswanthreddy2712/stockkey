@@ -97,7 +97,7 @@ export default function Login() {
       </div>
 
       {/* Right — dark form panel */}
-      <div className="flex items-center justify-center p-6 sm:p-12">
+      <div className="flex items-center justify-center p-6 sm:p-12 bg-[#0a0a0a]">
         <div className="w-full max-w-md animate-fade-up">
           {/* Mobile logo */}
           <Link to="/" className="lg:hidden flex items-center gap-2.5 mb-8">

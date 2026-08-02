@@ -126,7 +126,7 @@ export default function Register() {
       </div>
 
       {/* Right — dark form panel */}
-      <div className="flex items-center justify-center p-6 sm:p-10 overflow-y-auto">
+      <div className="flex items-center justify-center p-6 sm:p-10 overflow-y-auto bg-[#0a0a0a]">
         <div className="w-full max-w-md py-6 animate-fade-up">
           {/* Mobile logo */}
           <Link to="/" className="lg:hidden flex items-center gap-2.5 mb-8">
