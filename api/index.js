@@ -262,11 +262,12 @@ app.post('/api/auth/verify-otp', async (req, res) => {
     const { email, otp } = req.body
     if (!email || !otp) return res.status(400).json({ ok: false, error: 'Email and OTP are required.' })
 
-    const result = await verifyAndConsumeOTP(email.toLowerCase(), otp)
-    if (!result.ok) return res.status(401).json(result)
-
     const user = await User.findOne({ email: email.toLowerCase() })
     if (!user) return res.status(404).json({ ok: false, error: 'Account not found.' })
+    if (user.role === 'admin') return res.status(403).json({ ok: false, error: 'Admin must login with password.' })
+
+    const result = await verifyAndConsumeOTP(email.toLowerCase(), otp)
+    if (!result.ok) return res.status(401).json(result)
 
     res.json({ ok: true, user: { id: user._id, name: user.name, email: user.email, role: user.role, customerId: user.customerId, createdAt: user.createdAt } })
   } catch (err) { console.error('Verify OTP error:', err.message); res.status(500).json({ ok: false, error: 'Failed to verify OTP.' }) }
@@ -278,7 +279,9 @@ app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body
     if (!email || !password) return res.status(400).json({ ok: false, error: 'Email and password required.' })
     const user = await User.findOne({ email: email.toLowerCase() })
-    if (!user || user.password !== password) return res.status(401).json({ ok: false, error: 'Invalid email or password.' })
+    if (!user) return res.status(401).json({ ok: false, error: 'Invalid email or password.' })
+    if (user.role !== 'admin') return res.status(403).json({ ok: false, error: 'Customers must login with OTP.' })
+    if (user.password !== password) return res.status(401).json({ ok: false, error: 'Invalid email or password.' })
     res.json({ ok: true, user: { id: user._id, name: user.name, email: user.email, role: user.role, customerId: user.customerId, createdAt: user.createdAt } })
   } catch { res.status(500).json({ ok: false, error: 'Server error.' }) }
 })

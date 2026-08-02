@@ -4,11 +4,12 @@ import { useAuth } from '../../context/AuthContext'
 import { IconChart, IconUser, IconDashboard, IconMail, IconCheck } from '../../components/icons'
 
 export default function Login() {
-  const { sendOTP, loginWithOTP } = useAuth()
+  const { sendOTP, loginWithOTP, login } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const from = (location.state as { from?: string })?.from
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [otpSent, setOtpSent] = useState(false)
   const [otpTimer, setOtpTimer] = useState(0)
@@ -16,6 +17,8 @@ export default function Login() {
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
   const otpRefs = useRef<(HTMLInputElement | null)[]>([])
+
+  const isAdminEmail = email === 'admin@stockkey.in'
 
   useEffect(() => {
     if (otpTimer <= 0) return
@@ -35,6 +38,16 @@ export default function Login() {
     setOtpTimer(60)
     setSuccess(`OTP sent to ${email}`)
     setTimeout(() => otpRefs.current[0]?.focus(), 100)
+  }
+
+  const handlePasswordLogin = async () => {
+    if (!email || !password) { setError('Enter email and password.'); return }
+    setError('')
+    setLoading(true)
+    const res = await login(email, password)
+    setLoading(false)
+    if (!res.ok) { setError(res.error ?? 'Login failed'); return }
+    navigate(from || (res.user?.role === 'admin' ? '/admin' : '/dashboard'), { replace: true })
   }
 
   const handleOtpChange = (index: number, value: string) => {
@@ -66,7 +79,8 @@ export default function Login() {
     navigate(from || (res.user?.role === 'admin' ? '/admin' : '/dashboard'), { replace: true })
   }
 
-  const quickFill = (e: string) => { setEmail(e); setError(''); setSuccess(''); setOtpSent(false); setOtp(['', '', '', '', '', '']) }
+  const quickFillAdmin = () => { setEmail('admin@stockkey.in'); setPassword(''); setError(''); setSuccess(''); setOtpSent(false); setOtp(['', '', '', '', '', '']) }
+  const quickFillCustomer = () => { setEmail('customer@stockkey.in'); setPassword(''); setError(''); setSuccess(''); setOtpSent(false); setOtp(['', '', '', '', '', '']) }
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
@@ -91,8 +105,12 @@ export default function Login() {
 
       <div className="flex items-center justify-center p-6 sm:p-12 bg-[#F7F8FB]">
         <div className="w-full max-w-md animate-fade-up">
-          <h1 className="text-2xl font-display font-bold text-ink-900">Sign in with OTP</h1>
-          <p className="mt-1 text-sm text-ink-400">Enter your email, we'll send a one-time password.</p>
+          <h1 className="text-2xl font-display font-bold text-ink-900">
+            {isAdminEmail ? 'Admin Login' : 'Sign in with OTP'}
+          </h1>
+          <p className="mt-1 text-sm text-ink-400">
+            {isAdminEmail ? 'Enter your password to sign in.' : "Enter your email, we'll send a one-time password."}
+          </p>
 
           {error && <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
           {success && <div className="mt-4 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700 flex items-center gap-2"><IconCheck className="h-4 w-4" /> {success}</div>}
@@ -101,15 +119,28 @@ export default function Login() {
             <label className="label">Email address</label>
             <div className="relative">
               <IconUser className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-400" />
-              <input className="input pl-9" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" disabled={otpSent} />
+              <input className="input pl-9" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" disabled={otpSent && !isAdminEmail} />
             </div>
           </div>
 
-          {!otpSent ? (
+          {/* ADMIN: password login */}
+          {isAdminEmail ? (
+            <div className="mt-6 space-y-4">
+              <div>
+                <label className="label">Password</label>
+                <input className="input" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" onKeyDown={(e) => e.key === 'Enter' && handlePasswordLogin()} />
+              </div>
+              <button onClick={handlePasswordLogin} disabled={loading || !password} className="btn-gold w-full text-base disabled:opacity-50">
+                {loading ? 'Signing in...' : 'Sign In'}
+              </button>
+            </div>
+          ) : !otpSent ? (
+            /* CUSTOMER: send OTP */
             <button onClick={handleSendOTP} disabled={loading || !email} className="btn-gold w-full text-base mt-6 disabled:opacity-50">
               {loading ? 'Sending...' : 'Send OTP'}
             </button>
           ) : (
+            /* CUSTOMER: verify OTP */
             <div className="mt-6 space-y-4">
               <div>
                 <label className="label">Enter 6-digit OTP</label>
@@ -142,13 +173,13 @@ export default function Login() {
           <div className="mt-8 rounded-xl border border-dashed border-gold-500/30 bg-white p-5">
             <p className="text-xs font-semibold text-ink-400 uppercase tracking-wide">Quick login — click to fill</p>
             <div className="mt-3 grid gap-2">
-              <button onClick={() => quickFill('admin@stockkey.in')} className="flex items-center gap-3 rounded-xl bg-ink-50 px-4 py-3 text-left text-sm transition hover:bg-ink-100">
+              <button onClick={quickFillAdmin} className="flex items-center gap-3 rounded-xl bg-ink-50 px-4 py-3 text-left text-sm transition hover:bg-ink-100">
                 <IconDashboard className="h-4 w-4 text-gold-600" />
-                <span><strong className="text-ink-900">Admin:</strong> <span className="text-ink-500">admin@stockkey.in</span></span>
+                <span><strong className="text-ink-900">Admin:</strong> <span className="text-ink-500">admin@stockkey.in</span> <span className="text-xs text-ink-400">(password)</span></span>
               </button>
-              <button onClick={() => quickFill('customer@stockkey.in')} className="flex items-center gap-3 rounded-xl bg-ink-50 px-4 py-3 text-left text-sm transition hover:bg-ink-100">
+              <button onClick={quickFillCustomer} className="flex items-center gap-3 rounded-xl bg-ink-50 px-4 py-3 text-left text-sm transition hover:bg-ink-100">
                 <IconUser className="h-4 w-4 text-gold-600" />
-                <span><strong className="text-ink-900">Customer:</strong> <span className="text-ink-500">customer@stockkey.in</span></span>
+                <span><strong className="text-ink-900">Customer:</strong> <span className="text-ink-500">customer@stockkey.in</span> <span className="text-xs text-ink-400">(OTP)</span></span>
               </button>
             </div>
           </div>
