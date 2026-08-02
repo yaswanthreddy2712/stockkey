@@ -29,22 +29,18 @@ export default function Login() {
 
   const handleSendOTP = async () => {
     if (!email) { setError('Enter your email first.'); return }
-    setError('')
-    setSuccess('')
-    setLoading(true)
+    setError(''); setSuccess(''); setLoading(true)
     const res = await sendOTP(email)
     setLoading(false)
     if (!res.ok) { setError(res.error ?? 'Failed to send OTP'); return }
-    setOtpSent(true)
-    setOtpTimer(60)
+    setOtpSent(true); setOtpTimer(60)
     setSuccess(`OTP sent to ${email}`)
     setTimeout(() => otpRefs.current[0]?.focus(), 100)
   }
 
   const handlePasswordLogin = async () => {
     if (!email || !password) { setError('Enter email and password.'); return }
-    setError('')
-    setLoading(true)
+    setError(''); setLoading(true)
     const res = await login(email, password)
     setLoading(false)
     if (!res.ok) { setError(res.error ?? 'Login failed'); return }
@@ -53,17 +49,13 @@ export default function Login() {
 
   const handleOtpChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return
-    const newOtp = [...otp]
-    newOtp[index] = value.slice(-1)
-    setOtp(newOtp)
+    const newOtp = [...otp]; newOtp[index] = value.slice(-1); setOtp(newOtp)
     if (value && index < 5) otpRefs.current[index + 1]?.focus()
   }
-
   const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
     if (e.key === 'Backspace' && !otp[index] && index > 0) otpRefs.current[index - 1]?.focus()
     if (e.key === 'Enter' && otp.every((d) => d)) handleVerifyOTP()
   }
-
   const handleOtpPaste = (e: React.ClipboardEvent) => {
     const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
     if (pasted.length === 6) { setOtp(pasted.split('')); otpRefs.current[5]?.focus() }
@@ -72,8 +64,7 @@ export default function Login() {
   const handleVerifyOTP = async () => {
     const code = otp.join('')
     if (code.length !== 6) { setError('Enter the complete 6-digit OTP.'); return }
-    setError('')
-    setLoading(true)
+    setError(''); setLoading(true)
     const res = await loginWithOTP(email, code)
     setLoading(false)
     if (!res.ok) { setError(res.error ?? 'OTP verification failed'); return }
@@ -84,54 +75,62 @@ export default function Login() {
   const quickFillCustomer = () => { setEmail('customer@stockkey.in'); setPassword(''); setError(''); setSuccess(''); setOtpSent(false); setOtp(['', '', '', '', '', '']) }
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
-      <div className="bg-ink-900 relative overflow-hidden hidden lg:flex flex-col justify-between p-12">
-        <div className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-gold-500/10 blur-[120px]" />
-        <div className="pointer-events-none absolute bottom-20 right-0 h-72 w-72 rounded-full bg-gold-500/5 blur-[100px]" />
-        <div className="dot-grid pointer-events-none absolute inset-0 opacity-[0.07]" />
-        <Link to="/" className="relative z-10 flex items-center gap-2">
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-gold-500/15"><IconChart className="h-5 w-5 text-gold-500" /></span>
-          <span className="font-bold text-white">Stock Key Investments</span>
+    <div className="min-h-screen grid lg:grid-cols-2 bg-[#0a0a0a]">
+      {/* Left — dark brand panel */}
+      <div className="relative overflow-hidden hidden lg:flex flex-col justify-between p-12">
+        <div className="orb orb-gold w-[500px] h-[500px] -top-32 -left-32 opacity-60" />
+        <div className="orb orb-blue w-[400px] h-[400px] bottom-20 right-0 opacity-30" />
+        <div className="absolute inset-0 dot-grid opacity-[0.07]" />
+        <Link to="/" className="relative z-10 flex items-center gap-2.5">
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-sky-gradient text-white shadow-lg"><IconChart className="h-5 w-5" /></span>
+          <span className="font-bold text-white font-display">Stock Key Investments</span>
         </Link>
         <div className="relative z-10 animate-fade-up">
           <h2 className="text-3xl font-display font-bold leading-tight text-white">
-            Welcome back to <span className="text-gradient-gold">financial freedom.</span>
+            Welcome back to <span className="text-gradient-hero">financial freedom.</span>
           </h2>
-          <p className="mt-3 text-ink-400">Track your portfolio, monthly returns and insurance — all in one place.</p>
+          <p className="mt-3 text-white/50">Track your portfolio, monthly returns and insurance — all in one place.</p>
         </div>
         <div className="relative z-10">
-          <span className="badge-gold text-xs">SEBI Registered &middot; NISM-Certified Experts</span>
+          <span className="badge-sky text-xs">SEBI Registered &middot; NISM-Certified Experts</span>
         </div>
       </div>
 
-      <div className="flex items-center justify-center p-6 sm:p-12 bg-[#F7F8FB]">
+      {/* Right — dark form panel */}
+      <div className="flex items-center justify-center p-6 sm:p-12">
         <div className="w-full max-w-md animate-fade-up">
-          <h1 className="text-2xl font-display font-bold text-ink-900">
+          {/* Mobile logo */}
+          <Link to="/" className="lg:hidden flex items-center gap-2.5 mb-8">
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-sky-gradient text-white shadow-lg"><IconChart className="h-5 w-5" /></span>
+            <span className="font-bold text-white font-display">Stock Key</span>
+          </Link>
+
+          <h1 className="text-2xl font-display font-bold text-white">
             {isAdminEmail ? 'Admin Login' : 'Sign in with OTP'}
           </h1>
-          <p className="mt-1 text-sm text-ink-400">
+          <p className="mt-1 text-sm text-white/50">
             {isAdminEmail ? 'Enter your password to sign in.' : "Enter your email, we'll send a one-time password."}
           </p>
 
-          {error && <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
-          {success && <div className="mt-4 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700 flex items-center gap-2"><IconCheck className="h-4 w-4" /> {success}</div>}
+          {error && <div className="mt-4 rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">{error}</div>}
+          {success && <div className="mt-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 text-sm text-emerald-400 flex items-center gap-2"><IconCheck className="h-4 w-4" /> {success}</div>}
 
           <div className="mt-6">
             <label className="label">Email address</label>
             <div className="relative">
-              <IconUser className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-400" />
+              <IconUser className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
               <input className="input pl-9" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" disabled={otpSent && !isAdminEmail} />
             </div>
           </div>
 
-          {/* ADMIN: password login */}
+          {/* ADMIN: password */}
           {isAdminEmail ? (
             <div className="mt-6 space-y-4">
               <div>
                 <label className="label">Password</label>
                 <div className="relative">
                   <input className="input pr-10" type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" onKeyDown={(e) => e.key === 'Enter' && handlePasswordLogin()} />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-600 transition">
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition">
                     {showPassword ? (
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                     ) : (
@@ -145,12 +144,10 @@ export default function Login() {
               </button>
             </div>
           ) : !otpSent ? (
-            /* CUSTOMER: send OTP */
             <button onClick={handleSendOTP} disabled={loading || !email} className="btn-gold w-full text-base mt-6 disabled:opacity-50">
               {loading ? 'Sending...' : 'Send OTP'}
             </button>
           ) : (
-            /* CUSTOMER: verify OTP */
             <div className="mt-6 space-y-4">
               <div>
                 <label className="label">Enter 6-digit OTP</label>
@@ -158,7 +155,7 @@ export default function Login() {
                   {otp.map((digit, i) => (
                     <input key={i} ref={(el) => { otpRefs.current[i] = el }} type="text" inputMode="numeric" maxLength={1} value={digit}
                       onChange={(e) => handleOtpChange(i, e.target.value)} onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                      className="h-12 w-12 rounded-xl border border-ink-200 bg-white text-center text-lg font-bold text-ink-900 focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 outline-none transition tabular" />
+                      className="h-12 w-12 rounded-xl border border-white/10 bg-white/5 text-center text-lg font-bold text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 outline-none transition tabular" />
                   ))}
                 </div>
               </div>
@@ -167,29 +164,30 @@ export default function Login() {
               </button>
               <div className="text-center space-y-2">
                 {otpTimer > 0 ? (
-                  <p className="text-sm text-ink-400">Resend OTP in <strong className="text-ink-600">{otpTimer}s</strong></p>
+                  <p className="text-sm text-white/40">Resend OTP in <strong className="text-white/70">{otpTimer}s</strong></p>
                 ) : (
-                  <button onClick={handleSendOTP} className="text-sm font-medium text-gold-600 hover:text-gold-500">Resend OTP</button>
+                  <button onClick={handleSendOTP} className="text-sm font-medium text-sky-400 hover:text-sky-300">Resend OTP</button>
                 )}
-                <p><button onClick={() => { setOtpSent(false); setOtp(['', '', '', '', '', '']); setError(''); setSuccess('') }} className="text-sm text-ink-400 hover:text-ink-600">Change email</button></p>
+                <p><button onClick={() => { setOtpSent(false); setOtp(['', '', '', '', '', '']); setError(''); setSuccess('') }} className="text-sm text-white/40 hover:text-white/60">Change email</button></p>
               </div>
             </div>
           )}
 
-          <p className="mt-6 text-sm text-ink-400">
-            New here? <Link to="/register" className="font-medium text-gold-600 hover:text-gold-500">Create an account</Link>
+          <p className="mt-6 text-sm text-white/40">
+            New here? <Link to="/register" className="font-medium text-sky-400 hover:text-sky-300">Create an account</Link>
           </p>
 
-          <div className="mt-8 rounded-xl border border-dashed border-gold-500/30 bg-white p-5">
-            <p className="text-xs font-semibold text-ink-400 uppercase tracking-wide">Quick login — click to fill</p>
+          {/* Quick fill */}
+          <div className="mt-8 rounded-xl border border-dashed border-white/15 bg-white/[0.04] p-5">
+            <p className="text-xs font-semibold text-white/40 uppercase tracking-wide">Quick login — click to fill</p>
             <div className="mt-3 grid gap-2">
-              <button onClick={quickFillAdmin} className="flex items-center gap-3 rounded-xl bg-ink-50 px-4 py-3 text-left text-sm transition hover:bg-ink-100">
-                <IconDashboard className="h-4 w-4 text-gold-600" />
-                <span><strong className="text-ink-900">Admin:</strong> <span className="text-ink-500">admin@stockkey.in</span> <span className="text-xs text-ink-400">(password)</span></span>
+              <button onClick={quickFillAdmin} className="flex items-center gap-3 rounded-xl bg-white/[0.04] px-4 py-3 text-left text-sm transition hover:bg-white/[0.08]">
+                <IconDashboard className="h-4 w-4 text-sky-400" />
+                <span><strong className="text-white">Admin:</strong> <span className="text-white/50">admin@stockkey.in</span> <span className="text-xs text-white/30">(password)</span></span>
               </button>
-              <button onClick={quickFillCustomer} className="flex items-center gap-3 rounded-xl bg-ink-50 px-4 py-3 text-left text-sm transition hover:bg-ink-100">
-                <IconUser className="h-4 w-4 text-gold-600" />
-                <span><strong className="text-ink-900">Customer:</strong> <span className="text-ink-500">customer@stockkey.in</span> <span className="text-xs text-ink-400">(OTP)</span></span>
+              <button onClick={quickFillCustomer} className="flex items-center gap-3 rounded-xl bg-white/[0.04] px-4 py-3 text-left text-sm transition hover:bg-white/[0.08]">
+                <IconUser className="h-4 w-4 text-sky-400" />
+                <span><strong className="text-white">Customer:</strong> <span className="text-white/50">customer@stockkey.in</span> <span className="text-xs text-white/30">(OTP)</span></span>
               </button>
             </div>
           </div>
