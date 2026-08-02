@@ -3,7 +3,57 @@ export interface ChatMessage {
   role: 'user' | 'assistant'
   text: string
   timestamp: number
+  personality?: string
 }
+
+export interface AIPersonality {
+  id: string
+  name: string
+  role: string
+  avatar: string
+  color: string
+  greeting: string
+  style: 'professional' | 'friendly' | 'expert' | 'counselor'
+}
+
+export const personalities: AIPersonality[] = [
+  {
+    id: 'advisor',
+    name: 'Arjun',
+    role: 'Investment Advisor',
+    avatar: '📊',
+    color: 'from-sky-500 to-blue-600',
+    greeting: 'Hello! I\'m Arjun, your personal Investment Advisor. I specialize in helping you understand our investment plans, returns, and how to maximize your portfolio. What would you like to know?',
+    style: 'professional',
+  },
+  {
+    id: 'guide',
+    name: 'Priya',
+    role: 'Business Guide',
+    avatar: '💼',
+    color: 'from-purple-500 to-pink-600',
+    greeting: 'Hi there! I\'m Priya, your Business Guide at Stock Key. I can walk you through our business model, company story, and why 500+ investors trust us. Ask me anything!',
+    style: 'friendly',
+  },
+  {
+    id: 'expert',
+    name: 'Vikram',
+    role: 'Market Expert',
+    avatar: '📈',
+    color: 'from-emerald-500 to-teal-600',
+    greeting: 'Welcome! I\'m Vikram, your Market Expert. I know everything about our portfolio strategy, market trends, and how we achieve consistent 12% monthly returns. What\'s on your mind?',
+    style: 'expert',
+  },
+  {
+    id: 'counsel',
+    name: 'Meera',
+    role: 'Financial Counselor',
+    avatar: '🛡️',
+    color: 'from-amber-500 to-orange-600',
+    greeting: 'Hello! I\'m Meera, your Financial Counselor. I help you understand risk, safety, insurance, and make confident financial decisions. No question is too small. How can I help?',
+    style: 'counselor',
+  },
+]
 
 interface Rule {
   keywords: string[]

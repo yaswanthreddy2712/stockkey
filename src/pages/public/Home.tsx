@@ -7,6 +7,12 @@ import {
   IconHeart, IconCar, IconBike, IconStar, IconArrow,
 } from '../../components/icons'
 
+declare global {
+  interface Window {
+    __openChat?: () => void
+  }
+}
+
 const tickerData = [
   { symbol: 'NIFTY 50', value: '24,532.15', change: '+1.2%', up: true },
   { symbol: 'SENSEX', value: '80,842.30', change: '+0.9%', up: true },
@@ -97,6 +103,10 @@ export default function Home() {
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link to="/register" className="btn-gold btn-3d text-base px-7 py-3.5">Start Investing Today &rarr;</Link>
                 <Link to="/plans" className="btn-outline text-base px-7 py-3.5">View Plans</Link>
+                <button onClick={() => window.__openChat?.()} className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border border-sky-400/30 bg-sky-400/10 text-sky-300 text-base font-semibold hover:bg-sky-400/20 hover:border-sky-400/50 transition-all duration-300 hover:scale-[1.02]">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                  Talk to AI
+                </button>
               </div>
             </div>
             <div className="lg:col-span-5 flex justify-end">
