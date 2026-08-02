@@ -75,7 +75,7 @@ export default function Login() {
   const quickFillCustomer = () => { setEmail('customer@stockkey.in'); setPassword(''); setError(''); setSuccess(''); setOtpSent(false); setOtp(['', '', '', '', '', '']) }
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2 bg-[#0a0a0a]">
+    <div className="min-h-screen grid lg:grid-cols-2 bg-gray-900">
       {/* Left — dark brand panel */}
       <div className="relative overflow-hidden hidden lg:flex flex-col justify-between p-12">
         <div className="orb orb-gold w-[500px] h-[500px] -top-32 -left-32 opacity-60" />
@@ -83,13 +83,13 @@ export default function Login() {
         <div className="absolute inset-0 dot-grid opacity-[0.07]" />
         <Link to="/" className="relative z-10 flex items-center gap-2.5">
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-sky-gradient text-white shadow-lg"><IconChart className="h-5 w-5" /></span>
-          <span className="font-bold text-white font-display">Stock Key</span>
+          <span className="font-bold text-gray-100 font-display">Stock Key</span>
         </Link>
         <div className="relative z-10 animate-fade-up">
-          <h2 className="text-3xl font-display font-bold leading-tight text-white">
+          <h2 className="text-3xl font-display font-bold leading-tight text-gray-50">
             Welcome back to <span className="text-gradient-hero">financial freedom.</span>
           </h2>
-          <p className="mt-3 text-white/50">Track your portfolio, monthly returns and insurance — all in one place.</p>
+          <p className="mt-3 text-gray-400">Track your portfolio, monthly returns and insurance — all in one place.</p>
         </div>
         <div className="relative z-10">
           <span className="badge-sky text-xs">SEBI Registered &middot; NISM-Certified Experts</span>
@@ -97,18 +97,18 @@ export default function Login() {
       </div>
 
       {/* Right — dark form panel */}
-      <div className="flex items-center justify-center p-6 sm:p-12 bg-[#0a0a0a]">
+      <div className="flex items-center justify-center p-6 sm:p-12 bg-gray-900">
         <div className="w-full max-w-md animate-fade-up">
           {/* Mobile logo */}
           <Link to="/" className="lg:hidden flex items-center gap-2.5 mb-8">
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-sky-gradient text-white shadow-lg"><IconChart className="h-5 w-5" /></span>
-            <span className="font-bold text-white font-display">Stock Key</span>
+            <span className="font-bold text-gray-100 font-display">Stock Key</span>
           </Link>
 
-          <h1 className="text-2xl font-display font-bold text-white">
+          <h1 className="text-2xl font-display font-bold text-gray-50">
             {isAdminEmail ? 'Admin Login' : 'Sign in with OTP'}
           </h1>
-          <p className="mt-1 text-sm text-white/50">
+          <p className="mt-1 text-sm text-gray-400">
             {isAdminEmail ? 'Enter your password to sign in.' : "Enter your email, we'll send a one-time password."}
           </p>
 
@@ -118,7 +118,7 @@ export default function Login() {
           <div className="mt-6">
             <label className="label">Email address</label>
             <div className="relative">
-              <IconUser className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+              <IconUser className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
               <input className="input pl-9" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" disabled={otpSent && !isAdminEmail} />
             </div>
           </div>
@@ -130,7 +130,7 @@ export default function Login() {
                 <label className="label">Password</label>
                 <div className="relative">
                   <input className="input pr-10" type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" onKeyDown={(e) => e.key === 'Enter' && handlePasswordLogin()} />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition">
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition">
                     {showPassword ? (
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                     ) : (
@@ -155,7 +155,7 @@ export default function Login() {
                   {otp.map((digit, i) => (
                     <input key={i} ref={(el) => { otpRefs.current[i] = el }} type="text" inputMode="numeric" maxLength={1} value={digit}
                       onChange={(e) => handleOtpChange(i, e.target.value)} onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                      className="h-12 w-12 rounded-xl border border-white/10 bg-white/5 text-center text-lg font-bold text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 outline-none transition tabular" />
+                      className="h-12 w-12 rounded-xl border border-gray-700/50 bg-gray-800/60 text-center text-lg font-bold text-gray-100 focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 outline-none transition tabular" />
                   ))}
                 </div>
               </div>
@@ -164,30 +164,30 @@ export default function Login() {
               </button>
               <div className="text-center space-y-2">
                 {otpTimer > 0 ? (
-                  <p className="text-sm text-white/40">Resend OTP in <strong className="text-white/70">{otpTimer}s</strong></p>
+                  <p className="text-sm text-gray-500">Resend OTP in <strong className="text-gray-300">{otpTimer}s</strong></p>
                 ) : (
                   <button onClick={handleSendOTP} className="text-sm font-medium text-sky-400 hover:text-sky-300">Resend OTP</button>
                 )}
-                <p><button onClick={() => { setOtpSent(false); setOtp(['', '', '', '', '', '']); setError(''); setSuccess('') }} className="text-sm text-white/40 hover:text-white/60">Change email</button></p>
+                <p><button onClick={() => { setOtpSent(false); setOtp(['', '', '', '', '', '']); setError(''); setSuccess('') }} className="text-sm text-gray-500 hover:text-gray-300">Change email</button></p>
               </div>
             </div>
           )}
 
-          <p className="mt-6 text-sm text-white/40">
+          <p className="mt-6 text-sm text-gray-500">
             New here? <Link to="/register" className="font-medium text-sky-400 hover:text-sky-300">Create an account</Link>
           </p>
 
           {/* Quick fill */}
-          <div className="mt-8 rounded-xl border border-dashed border-white/15 bg-white/[0.04] p-5">
-            <p className="text-xs font-semibold text-white/40 uppercase tracking-wide">Quick login — click to fill</p>
+          <div className="mt-8 rounded-xl border border-dashed border-gray-700/40 bg-gray-800/30 p-5">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Quick login — click to fill</p>
             <div className="mt-3 grid gap-2">
-              <button onClick={quickFillAdmin} className="flex items-center gap-3 rounded-xl bg-white/[0.04] px-4 py-3 text-left text-sm transition hover:bg-white/[0.08]">
+              <button onClick={quickFillAdmin} className="flex items-center gap-3 rounded-xl bg-gray-800/40 px-4 py-3 text-left text-sm transition hover:bg-gray-700/40">
                 <IconDashboard className="h-4 w-4 text-sky-400" />
-                <span><strong className="text-white">Admin:</strong> <span className="text-white/50">admin@stockkey.in</span> <span className="text-xs text-white/30">(password)</span></span>
+                <span><strong className="text-gray-100">Admin:</strong> <span className="text-gray-400">admin@stockkey.in</span> <span className="text-xs text-gray-500">(password)</span></span>
               </button>
-              <button onClick={quickFillCustomer} className="flex items-center gap-3 rounded-xl bg-white/[0.04] px-4 py-3 text-left text-sm transition hover:bg-white/[0.08]">
+              <button onClick={quickFillCustomer} className="flex items-center gap-3 rounded-xl bg-gray-800/40 px-4 py-3 text-left text-sm transition hover:bg-gray-700/40">
                 <IconUser className="h-4 w-4 text-sky-400" />
-                <span><strong className="text-white">Customer:</strong> <span className="text-white/50">customer@stockkey.in</span> <span className="text-xs text-white/30">(OTP)</span></span>
+                <span><strong className="text-gray-100">Customer:</strong> <span className="text-gray-400">customer@stockkey.in</span> <span className="text-xs text-gray-500">(OTP)</span></span>
               </button>
             </div>
           </div>

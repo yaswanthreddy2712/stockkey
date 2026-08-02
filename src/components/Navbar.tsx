@@ -26,7 +26,7 @@ export default function Navbar() {
   const handleLogout = () => { logout(); setOpen(false); navigate('/') }
 
   return (
-    <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${scrolled ? 'bg-[rgba(8,12,24,0.82)] backdrop-blur-xl shadow-[0_8px_28px_rgba(0,0,0,0.28)] border-b border-sky-400/18' : 'bg-transparent'}`}>
+    <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${scrolled ? 'bg-gray-900/90 backdrop-blur-xl shadow-lg border-b border-gray-700/50' : 'bg-transparent'}`}>
       <nav className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 max-w-[88rem] mx-auto min-h-[3.5rem]">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 flex-shrink-0 group" onClick={() => setOpen(false)}>
@@ -45,7 +45,7 @@ export default function Navbar() {
               end={item.to === '/'}
               className={({ isActive }) =>
                 `nav-item-3d inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-300 ${
-                  isActive ? 'text-gold-300' : 'text-white/88 hover:text-white hover:bg-white/[0.08]'
+                  isActive ? 'text-sky-300' : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
                 }`
               }
             >
@@ -83,10 +83,10 @@ export default function Navbar() {
             </>
           ) : (
             <div className="inline-flex items-center rounded-full overflow-hidden border border-sky-400/35 bg-sky-gradient-soft shadow-[0_4px_14px_rgba(0,0,0,0.2)]">
-              <Link to="/login" className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-sky-100 hover:bg-sky-400/20 transition-colors">
+              <Link to="/login" className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-gray-300 hover:bg-gray-700/50 transition-colors">
                 <IconUser className="h-3.5 w-3.5" /> Login
               </Link>
-              <span className="text-sky-200/40 text-xs">/</span>
+              <span className="text-gray-500 text-xs">/</span>
               <Link to="/register" className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold bg-sky-gradient text-white hover:opacity-90 transition-opacity">
                 Sign Up
               </Link>
@@ -103,7 +103,7 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       {open && (
-        <div className="xl:hidden bg-[rgba(8,12,24,0.95)] backdrop-blur-xl border-t border-white/[0.08]">
+        <div className="xl:hidden bg-gray-900/95 backdrop-blur-xl border-t border-gray-700/50">
           <div className="section py-4 flex flex-col gap-1">
             {navItems.map((item) => (
               <NavLink
@@ -113,7 +113,7 @@ export default function Navbar() {
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition ${
-                    isActive ? 'text-gold-300 bg-gold-500/10' : 'text-white/70 hover:text-white hover:bg-white/[0.06]'
+                    isActive ? 'text-sky-300 bg-sky-500/10' : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
                   }`
                 }
               >

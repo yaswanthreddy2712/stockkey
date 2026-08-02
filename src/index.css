@@ -4,7 +4,7 @@
 
 @layer base {
   html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-  body { @apply font-sans antialiased bg-[#0a0a0a] text-white; font-feature-settings: "cv02","cv03","cv04","cv11","ss01"; }
+  body { @apply font-sans antialiased bg-[#111827] text-gray-100; font-feature-settings: "cv02","cv03","cv04","cv11","ss01"; }
   h1, h2, h3, h4 { @apply font-display; }
   .tabular { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
 }
@@ -23,27 +23,27 @@
   .btn-sky { @apply btn bg-sky-gradient text-white hover:shadow-lg active:scale-[0.98]; }
 
   /* ── Form controls ── */
-  .input { @apply w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/40 transition focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400/20; }
+  .input { @apply w-full rounded-xl border border-gray-600/50 bg-gray-800/60 px-4 py-2.5 text-sm text-gray-100 placeholder:text-gray-400 transition focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400/20; }
   .input-light { @apply w-full rounded-xl border border-ink-200 bg-white px-4 py-2.5 text-sm text-ink-800 placeholder:text-ink-400 transition focus:border-gold-500 focus:outline-none focus:ring-2 focus:ring-gold-500/15; }
-  .label { @apply block text-xs font-semibold uppercase tracking-wide text-white/50 mb-1.5; }
+  .label { @apply block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1.5; }
   .label-light { @apply block text-xs font-semibold uppercase tracking-wide text-ink-500 mb-1.5; }
 
   /* ── Cards ── */
-  .premium-card { @apply rounded-2xl border border-white/[0.06] bg-white/[0.04] shadow-premium transition-all duration-300; }
+  .premium-card { @apply rounded-2xl border border-gray-700/50 bg-gray-800/50 shadow-premium transition-all duration-300; }
   .premium-card-hover { @apply hover:shadow-premium-lg hover:-translate-y-1; }
-  .glass-card { @apply rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-xl shadow-glass; }
-  .glass-card-hover { @apply hover:bg-white/[0.1] hover:border-white/20 transition-all duration-300; }
+  .glass-card { @apply rounded-2xl border border-gray-600/30 bg-gray-800/40 backdrop-blur-xl shadow-glass; }
+  .glass-card-hover { @apply hover:bg-gray-700/40 hover:border-gray-500/40 transition-all duration-300; }
 
   /* ── Badges ── */
   .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold; }
-  .badge-gold { @apply badge bg-gold-500/10 text-gold-300 ring-1 ring-gold-500/30; }
+  .badge-gold { @apply badge bg-gold-500/15 text-gold-300 ring-1 ring-gold-500/30; }
   .badge-gold-solid { @apply badge bg-gold-gradient text-ink-900; }
-  .badge-sky { @apply badge bg-sky-400/10 text-sky-400 ring-1 ring-sky-400/30; }
+  .badge-sky { @apply badge bg-sky-400/15 text-sky-300 ring-1 ring-sky-400/30; }
 
   /* ── Layout ── */
   .section { @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8; }
   .section-wide { @apply max-w-[88rem] mx-auto px-4 sm:px-6 lg:px-8; }
-  .dot-grid { background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px); background-size: 28px 28px; }
+  .dot-grid { background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 28px 28px; }
   .gold-accent-top { @apply relative; }
   .gold-accent-top::before { content:""; @apply absolute -top-px left-1/2 -translate-x-1/2 h-[2px] w-16 rounded-full bg-gold-gradient; }
 }
@@ -82,17 +82,17 @@
 
 /* ── Glass 3D ── */
 .glass-3d {
-  background: rgba(255,255,255,0.08);
+  background: rgba(31,41,55,0.6);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.08);
   box-shadow: 0 8px 32px rgba(0,0,0,0.2);
   transform-style: preserve-3d;
   transition: transform 0.45s cubic-bezier(0.2,0.8,0.2,1), box-shadow 0.45s, background 0.35s;
 }
 .glass-3d:hover {
-  background: rgba(255,255,255,0.12);
-  border-color: rgba(255,255,255,0.2);
+  background: rgba(55,65,81,0.7);
+  border-color: rgba(255,255,255,0.12);
   transform: translateY(-6px) rotateX(3deg);
   box-shadow: 0 20px 40px rgba(0,0,0,0.3);
 }
@@ -189,14 +189,14 @@
 
 /* ── Plan card (dark) ── */
 .plan-card-dark {
-  position:relative; min-height:22rem; overflow:hidden; border-radius:2rem; background:#0a0a0a; padding:1.5rem; color:#fff;
-  border:1px solid rgba(255,255,255,0.05);
+  position:relative; min-height:22rem; overflow:hidden; border-radius:2rem; background:#1e293b; padding:1.5rem; color:#f1f5f9;
+  border:1px solid rgba(255,255,255,0.06);
   transition: transform 0.45s cubic-bezier(0.2,0.8,0.2,1), box-shadow 0.45s;
   transform-style: preserve-3d;
 }
 .plan-card-dark:hover {
   transform: translateY(-10px) rotateX(4deg) scale(1.015);
-  box-shadow: 0 24px 48px rgba(0,0,0,0.25);
+  box-shadow: 0 24px 48px rgba(0,0,0,0.3);
 }
 .plan-card-dark .arrow-circle {
   width:2.75rem; height:2.75rem; display:grid; place-items:center; border-radius:9999px;

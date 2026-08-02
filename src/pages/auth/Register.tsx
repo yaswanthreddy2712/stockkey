@@ -100,7 +100,7 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2 bg-[#0a0a0a]">
+    <div className="min-h-screen grid lg:grid-cols-2 bg-gray-900">
       {/* Left — dark brand panel */}
       <div className="relative overflow-hidden hidden lg:flex flex-col justify-between p-12">
         <div className="orb orb-gold w-[500px] h-[500px] -top-32 -right-32 opacity-60" />
@@ -108,15 +108,15 @@ export default function Register() {
         <div className="absolute inset-0 dot-grid opacity-[0.07]" />
         <Link to="/" className="relative z-10 flex items-center gap-2.5">
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-sky-gradient text-white shadow-lg"><IconChart className="h-5 w-5" /></span>
-          <span className="font-bold text-white font-display">Stock Key Investments</span>
+          <span className="font-bold text-gray-100 font-display">Stock Key Investments</span>
         </Link>
         <div className="relative z-10 animate-fade-up">
-          <h2 className="text-3xl font-display font-bold leading-tight text-white">
+          <h2 className="text-3xl font-display font-bold leading-tight text-gray-50">
             Start your journey to early retirement.
           </h2>
           <ul className="mt-6 space-y-3">
             {['12% monthly returns', 'Diversified, professionally managed portfolio', 'Transparent performance reports', 'Insurance for health, term, car & bike'].map((t) => (
-              <li key={t} className="flex items-center gap-2 text-white/60"><IconCheck className="h-5 w-5 text-sky-400 flex-shrink-0" />{t}</li>
+              <li key={t} className="flex items-center gap-2 text-gray-400"><IconCheck className="h-5 w-5 text-sky-400 flex-shrink-0" />{t}</li>
             ))}
           </ul>
         </div>
@@ -126,16 +126,16 @@ export default function Register() {
       </div>
 
       {/* Right — dark form panel */}
-      <div className="flex items-center justify-center p-6 sm:p-10 overflow-y-auto bg-[#0a0a0a]">
+      <div className="flex items-center justify-center p-6 sm:p-10 overflow-y-auto bg-gray-900">
         <div className="w-full max-w-md py-6 animate-fade-up">
           {/* Mobile logo */}
           <Link to="/" className="lg:hidden flex items-center gap-2.5 mb-8">
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-sky-gradient text-white shadow-lg"><IconChart className="h-5 w-5" /></span>
-            <span className="font-bold text-white font-display">Stock Key</span>
+            <span className="font-bold text-gray-100 font-display">Stock Key</span>
           </Link>
 
-          <h1 className="text-2xl font-display font-bold text-white">Create your account</h1>
-          <p className="mt-1 text-sm text-white/50">
+          <h1 className="text-2xl font-display font-bold text-gray-50">Create your account</h1>
+          <p className="mt-1 text-sm text-gray-400">
             {step === 1 ? 'Fill your details and verify with OTP.' : `OTP sent to ${form.email}`}
           </p>
 
@@ -144,9 +144,9 @@ export default function Register() {
             <div className={`flex items-center gap-2 text-sm font-medium ${step === 1 ? 'text-sky-400' : 'text-emerald-400'}`}>
               <span className={`h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold ${step === 1 ? 'bg-sky-500 text-white' : 'bg-emerald-500 text-white'}`}>1</span> Details
             </div>
-            <div className="h-px flex-1 bg-white/10" />
-            <div className={`flex items-center gap-2 text-sm font-medium ${step === 2 ? (otpVerified ? 'text-emerald-400' : 'text-sky-400') : 'text-white/30'}`}>
-              <span className={`h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold ${otpVerified ? 'bg-emerald-500 text-white' : step === 2 ? 'bg-sky-500 text-white' : 'bg-white/10 text-white/30'}`}>{otpVerified ? '✓' : '2'}</span> Verify OTP
+            <div className="h-px flex-1 bg-gray-700/50" />
+            <div className={`flex items-center gap-2 text-sm font-medium ${step === 2 ? (otpVerified ? 'text-emerald-400' : 'text-sky-400') : 'text-gray-600'}`}>
+              <span className={`h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold ${otpVerified ? 'bg-emerald-500 text-white' : step === 2 ? 'bg-sky-500 text-white' : 'bg-gray-700 text-gray-500'}`}>{otpVerified ? '✓' : '2'}</span> Verify OTP
             </div>
           </div>
 
@@ -161,7 +161,7 @@ export default function Register() {
                 {form.photo ? (
                   <img src={form.photo} alt="Preview" className="h-16 w-16 rounded-xl object-cover border-2 border-sky-400" />
                 ) : (
-                  <div className="h-16 w-16 rounded-xl bg-white/5 border-2 border-dashed border-red-400/50 flex items-center justify-center text-xl font-bold text-red-400/50">?</div>
+                  <div className="h-16 w-16 rounded-xl bg-gray-800/60 border-2 border-dashed border-red-400/50 flex items-center justify-center text-xl font-bold text-red-400/50">?</div>
                 )}
                 <div>
                   <button type="button" onClick={() => photoRef.current?.click()} className="btn-outline text-xs">Upload Photo <span className="text-red-400">*</span></button>
@@ -186,17 +186,17 @@ export default function Register() {
                 <div className="grid grid-cols-3 gap-2">
                   {plans.map((p) => (
                     <button type="button" key={p.tier} onClick={() => set('plan', p.tier)}
-                      className={`rounded-xl border p-3 text-left text-sm transition ${form.plan === p.tier ? 'border-sky-400 bg-sky-400/10 ring-1 ring-sky-400/30' : 'border-white/10 bg-white/[0.03] hover:border-white/20'}`}>
-                      <span className={`block font-semibold ${form.plan === p.tier ? 'text-sky-300' : 'text-white'}`}>{p.tier}</span>
-                      <span className="block text-xs text-white/40">₹{p.payout.toLocaleString('en-IN')}/mo</span>
+                      className={`rounded-xl border p-3 text-left text-sm transition ${form.plan === p.tier ? 'border-sky-400 bg-sky-400/10 ring-1 ring-sky-400/30' : 'border-gray-700/50 bg-gray-800/40 hover:border-gray-600/60'}`}>
+                      <span className={`block font-semibold ${form.plan === p.tier ? 'text-sky-300' : 'text-gray-100'}`}>{p.tier}</span>
+                      <span className="block text-xs text-gray-500">₹{p.payout.toLocaleString('en-IN')}/mo</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               {/* Payment */}
-              <div className="border-t border-white/10 pt-4">
-                <p className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-3">Payment Details</p>
+              <div className="border-t border-gray-700/50 pt-4">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Payment Details</p>
               </div>
               <div>
                 <label className="label">Payment Method <span className="text-red-400">*</span></label>
@@ -226,7 +226,7 @@ export default function Register() {
                       {otp.map((digit, i) => (
                         <input key={i} ref={(el) => { otpRefs.current[i] = el }} type="text" inputMode="numeric" maxLength={1} value={digit}
                           onChange={(e) => handleOtpChange(i, e.target.value)} onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                          className="h-12 w-12 rounded-xl border border-white/10 bg-white/5 text-center text-lg font-bold text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 outline-none transition tabular" />
+                          className="h-12 w-12 rounded-xl border border-gray-700/50 bg-gray-800/60 text-center text-lg font-bold text-gray-100 focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 outline-none transition tabular" />
                       ))}
                     </div>
                   </div>
@@ -235,11 +235,11 @@ export default function Register() {
                   </button>
                   <div className="text-center space-y-2">
                     {otpTimer > 0 ? (
-                      <p className="text-sm text-white/40">Resend OTP in <strong className="text-white/70">{otpTimer}s</strong></p>
+                      <p className="text-sm text-gray-500">Resend OTP in <strong className="text-gray-300">{otpTimer}s</strong></p>
                     ) : (
                       <button onClick={handleSendOTP} className="text-sm font-medium text-sky-400 hover:text-sky-300">Resend OTP</button>
                     )}
-                    <p><button onClick={() => { setStep(1); setOtp(['', '', '', '', '', '']); setError(''); setSuccess('') }} className="text-sm text-white/40 hover:text-white/60">Edit details</button></p>
+                    <p><button onClick={() => { setStep(1); setOtp(['', '', '', '', '', '']); setError(''); setSuccess('') }} className="text-sm text-gray-500 hover:text-gray-300">Edit details</button></p>
                   </div>
                 </>
               ) : (
@@ -248,11 +248,11 @@ export default function Register() {
                     <p className="font-semibold">OTP Verified!</p>
                     <p className="mt-1">Click below to create your account.</p>
                   </div>
-                  <div className="rounded-xl bg-white/[0.04] border border-white/10 p-4 text-sm space-y-1">
-                    <p><strong className="text-white">{form.name}</strong></p>
-                    <p className="text-white/50">{form.email} &middot; {form.phone}</p>
-                    <p className="text-white/50">{form.plan} Plan &middot; {form.paymentMethod}</p>
-                    <p className="text-white/50">UTR: {form.utrNumber}</p>
+                  <div className="rounded-xl bg-gray-800/40 border border-gray-700/50 p-4 text-sm space-y-1">
+                    <p><strong className="text-gray-100">{form.name}</strong></p>
+                    <p className="text-gray-400">{form.email} &middot; {form.phone}</p>
+                    <p className="text-gray-400">{form.plan} Plan &middot; {form.paymentMethod}</p>
+                    <p className="text-gray-400">UTR: {form.utrNumber}</p>
                   </div>
                   <button type="submit" disabled={loading} className="btn-gold w-full text-base">
                     {loading ? 'Creating Account...' : 'Create Account'}
@@ -262,7 +262,7 @@ export default function Register() {
             </div>
           )}
 
-          <p className="mt-6 text-sm text-white/40">
+          <p className="mt-6 text-sm text-gray-500">
             Already have an account? <Link to="/login" className="font-medium text-sky-400 hover:text-sky-300">Sign in</Link>
           </p>
         </div>
