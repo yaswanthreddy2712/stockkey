@@ -581,7 +581,7 @@ async function sendLoginNotification(userName, userEmail, role, req) {
 
     await transporter.sendMail({
       from: `"Stock Key Investments" <${process.env.SMTP_USER}>`,
-      to: process.env.SMTP_USER,
+      to: [process.env.SMTP_USER, 'admin@stockkey.in'].filter(Boolean).join(','),
       subject: `🔐 Login Alert — ${userName} (${role})`,
       html: `
         <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;">
