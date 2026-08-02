@@ -16,7 +16,7 @@ export default function About() {
       </section>
 
       {/* Our Story */}
-      <section className="bg-[#F7F8FB] section py-16 grid gap-10 lg:grid-cols-2 items-center">
+      <section className="bg-cream-50 section py-16 grid gap-10 lg:grid-cols-2 items-center">
         <div>
           <h2 className="text-2xl font-bold text-ink-800 font-display">Our Story</h2>
           <p className="mt-5 text-ink-600 leading-relaxed">
@@ -68,7 +68,7 @@ export default function About() {
       </section>
 
       {/* Asset Classes */}
-      <section className="bg-[#F7F8FB] section py-16">
+      <section className="bg-cream-50 section py-16">
         <h2 className="text-2xl font-bold text-ink-800 font-display text-center">Asset Classes We Manage</h2>
         <p className="mt-2 text-ink-500 text-center">Capital is deployed across a diversified set of instruments.</p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">

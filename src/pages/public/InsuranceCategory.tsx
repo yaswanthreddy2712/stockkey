@@ -76,7 +76,7 @@ export default function InsuranceCategoryPage() {
         </div>
       </section>
 
-      <div className="bg-[#F7F8FB] section py-10">
+      <div className="bg-cream-50 section py-10">
         {/* Premium calculator bar */}
         <div className="premium-card p-5 mb-8">
           <div className="flex flex-wrap items-end gap-6">

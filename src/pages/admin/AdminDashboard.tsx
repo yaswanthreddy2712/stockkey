@@ -10,7 +10,7 @@ import {
 } from 'recharts'
 import { Link } from 'react-router-dom'
 
-const PIE_COLORS = ['#D4AF37', '#B8941F', '#475073', '#2E3A5C', '#11172A']
+const PIE_COLORS = ['var(--gold-500)', 'var(--gold-600)', 'var(--ink-500)', 'var(--ink-600)', 'var(--ink-800)']
 
 export default function AdminDashboard() {
   const { customers, leads } = useData()
@@ -71,11 +71,11 @@ export default function AdminDashboard() {
           <h3 className="font-bold text-ink-800 mb-4 font-display">Monthly Payouts Trend</h3>
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={monthlyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E8EAF0" />
-              <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#475073" />
-              <YAxis tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 12 }} stroke="#475073" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--ink-100)" />
+              <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="var(--ink-400)" />
+              <YAxis tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 12 }} stroke="var(--ink-400)" />
               <Tooltip formatter={(v: number) => inr(v)} />
-              <Bar dataKey="payouts" name="Payouts" fill="#D4AF37" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="payouts" name="Payouts" fill="var(--gold-500)" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

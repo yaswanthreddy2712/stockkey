@@ -76,7 +76,7 @@ export default function InsuranceHub() {
       </section>
 
       {/* Categories */}
-      <section className="bg-[#F7F8FB] section py-16 lg:py-20">
+      <section className="bg-cream-50 section py-16 lg:py-20">
         <div className="text-center max-w-2xl mx-auto">
           <h2 className="text-display-lg font-display text-ink-900">What would you like to insure?</h2>
           <p className="mt-3 text-ink-500 text-lg">Select a category to compare plans and get a personalised quote.</p>

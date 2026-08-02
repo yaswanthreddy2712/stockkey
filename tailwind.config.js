@@ -7,6 +7,7 @@ export default {
   theme: {
     extend: {
       colors: {
+        // ── Ink (admin panel) ──
         ink: {
           950: '#070A12',
           900: '#0B0F1A',
@@ -22,6 +23,20 @@ export default {
           100: '#D1D5DB',
           50: '#F3F4F6',
         },
+        // ── Light section palette ──
+        cream: {
+          DEFAULT: '#f7f5f2',
+          50: '#faf9f7',
+          100: '#f7f5f2',
+          200: '#f1f0ee',
+          300: '#eceae6',
+          400: '#e6e5e2',
+          500: '#8d8d8d',
+          600: '#5a5a5a',
+          700: '#111111',
+          800: '#b15f2c',
+        },
+        // ── Gold accent ──
         gold: {
           50: '#FBF7EA',
           100: '#F8EFCE',
@@ -34,10 +49,12 @@ export default {
           800: '#6E560F',
           900: '#4A3908',
         },
+        // ── Blue accent ──
         sky: {
           400: '#38bdf8',
           500: '#0ea5e9',
         },
+        // ── Violet accent ──
         violet: {
           400: '#a78bfa',
           500: '#8b5cf6',
@@ -65,6 +82,8 @@ export default {
         'ink-radial': 'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(212,175,55,0.18) 0%, transparent 60%)',
         'sky-gradient': 'linear-gradient(145deg, #38bdf8, #6366f1)',
         'sky-gradient-soft': 'linear-gradient(145deg, rgba(56,189,248,0.16), rgba(99,102,241,0.1))',
+        'dark-vignette-start': 'rgba(17,24,39,0.55)',
+        'dark-vignette-end': 'rgba(17,24,39,0.75)',
       },
       keyframes: {
         'fade-up': {

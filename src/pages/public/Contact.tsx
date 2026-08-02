@@ -14,7 +14,7 @@ export default function Contact() {
       </section>
 
       {/* Content */}
-      <section className="bg-[#F7F8FB] section py-16 grid gap-8 lg:grid-cols-2">
+      <section className="bg-cream-50 section py-16 grid gap-8 lg:grid-cols-2">
         {/* Contact info */}
         <div>
           <h2 className="text-2xl font-bold text-ink-900 font-display">Get in touch</h2>

@@ -19,7 +19,7 @@ export default function InvestmentPlans() {
       </section>
 
       {/* Plan cards */}
-      <section className="bg-[#F7F8FB] section py-16">
+      <section className="bg-cream-50 section py-16">
         <div className="grid gap-6 md:grid-cols-3">
           {investmentPlans.map((p) => (
             <div key={p.tier} className={`premium-card premium-card-hover p-6 relative ${p.highlight ? 'ring-1 ring-gold-500/40 shadow-gold-glow' : ''}`}>
@@ -93,7 +93,7 @@ export default function InvestmentPlans() {
       </section>
 
       {/* Lead form */}
-      <section id="lead" className="bg-[#F7F8FB] section py-16">
+      <section id="lead" className="bg-cream-50 section py-16">
         <div className="max-w-2xl mx-auto">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-ink-800 font-display">Start Investing Today</h2>

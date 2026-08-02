@@ -42,7 +42,7 @@ export default function DashboardShell({ variant, children }: ShellProps) {
     }`
 
   return (
-    <div className="min-h-screen bg-[#F7F8FB] flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-cream-50 flex flex-col lg:flex-row">
       {/* Sidebar */}
       <aside className="lg:w-[260px] lg:min-h-screen lg:fixed lg:top-0 lg:left-0 bg-ink-950 flex flex-col border-r border-white/[0.06]">
         {/* Thin gold accent line at top */}

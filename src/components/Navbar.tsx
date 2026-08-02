@@ -51,7 +51,7 @@ export default function Navbar() {
             >
               {({ isActive }) => (
                 <>
-                  <span className={`nav-icon-3d bg-gradient-to-br ${item.iconBg} ${isActive ? 'text-white shadow-[0_0_0_2px_rgba(240,215,140,0.4)]' : 'text-ink-900'}`}>
+                  <span className={`nav-icon-3d bg-gradient-to-br ${item.iconBg} ${isActive ? 'text-white' : 'text-ink-900'}`} style={isActive ? { boxShadow: '0 0 0 2px rgba(240,215,140,0.4)' } : undefined}>
                     <item.icon className="h-3 w-3" />
                   </span>
                   {item.label}
@@ -82,7 +82,7 @@ export default function Navbar() {
               </div>
             </>
           ) : (
-            <div className="inline-flex items-center rounded-full overflow-hidden border border-sky-400/35 bg-sky-gradient-soft shadow-[0_4px_14px_rgba(0,0,0,0.2)]">
+            <div className="inline-flex items-center rounded-full overflow-hidden border border-sky-400/35 bg-sky-gradient-soft">
               <Link to="/login" className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-gray-300 hover:bg-gray-700/50 transition-colors">
                 <IconUser className="h-3.5 w-3.5" /> Login
               </Link>
