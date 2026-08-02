@@ -131,6 +131,147 @@ app.use(express.json())
 // Health
 app.get('/api/health', (_req, res) => res.json({ ok: true }))
 
+// ─── OTP STORE (MongoDB for serverless persistence) ────────────────────
+const OTP = mongoose.model('OTP', new mongoose.Schema({
+  email: { type: String, required: true, index: true },
+  code: { type: String, required: true },
+  expiresAt: { type: Number, required: true },
+  attempts: { type: Number, default: 0 },
+}, { timestamps: false }))
+
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString()
+}
+
+async function saveOTP(email, code) {
+  await OTP.deleteMany({ email: email.toLowerCase() })
+  await OTP.create({ email: email.toLowerCase(), code, expiresAt: Date.now() + 5 * 60 * 1000, attempts: 0 })
+}
+
+async function verifyAndConsumeOTP(email, otp) {
+  const record = await OTP.findOne({ email: email.toLowerCase() })
+  if (!record) return { ok: false, error: 'No OTP requested. Please request a new one.' }
+  if (Date.now() > record.expiresAt) { await OTP.deleteOne({ _id: record._id }); return { ok: false, error: 'OTP expired. Please request a new one.' } }
+  if (record.attempts >= 5) { await OTP.deleteOne({ _id: record._id }); return { ok: false, error: 'Too many attempts. Please request a new OTP.' } }
+  record.attempts++
+  await record.save()
+  if (record.code !== otp) return { ok: false, error: `Incorrect OTP. ${5 - record.attempts} attempts remaining.` }
+  await OTP.deleteOne({ _id: record._id })
+  return { ok: true }
+}
+
+// ─── OTP ENDPOINTS ─────────────────────────────────────────────────────
+app.post('/api/auth/send-otp', async (req, res) => {
+  try {
+    const { email } = req.body
+    if (!email) return res.status(400).json({ ok: false, error: 'Email is required.' })
+    const user = await User.findOne({ email: email.toLowerCase() })
+    if (!user) return res.status(404).json({ ok: false, error: 'No account found with this email.' })
+
+    const code = generateOTP()
+    await saveOTP(email.toLowerCase(), code)
+
+    const transporter = createTransporter()
+    if (!transporter) return res.status(503).json({ ok: false, error: 'Email service not configured.' })
+
+    await transporter.sendMail({
+      from: `"Stock Key Investments" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: `Your Login OTP: ${code}`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;background:#fff;">
+          <div style="background:linear-gradient(135deg,#1a1f2e 0%,#0d1117 100%);padding:28px;text-align:center;">
+            <h1 style="color:#D4AF37;margin:0;font-size:22px;">Stock Key Investments</h1>
+          </div>
+          <div style="padding:32px;text-align:center;">
+            <p style="color:#475569;font-size:14px;margin-bottom:8px;">Your One-Time Password (OTP)</p>
+            <div style="background:#f8f9fa;border:2px dashed #D4AF37;border-radius:12px;padding:20px;margin:16px 0;">
+              <p style="font-size:36px;font-weight:bold;letter-spacing:8px;color:#1a1f2e;margin:0;">${code}</p>
+            </div>
+            <p style="color:#9ca3af;font-size:12px;margin-top:16px;">This OTP expires in <strong>5 minutes</strong>.</p>
+            <p style="color:#9ca3af;font-size:12px;">If you didn't request this, please ignore this email.</p>
+          </div>
+          <div style="background:#f8f9fa;padding:16px;text-align:center;border-top:1px solid #e5e7eb;">
+            <p style="color:#9ca3af;font-size:11px;margin:0;">Stock Key Investments · SEBI Registered</p>
+          </div>
+        </div>
+      `,
+    })
+
+    res.json({ ok: true, message: `OTP sent to ${email}` })
+  } catch (err) { console.error('Send OTP error:', err.message); res.status(500).json({ ok: false, error: 'Failed to send OTP.' }) }
+})
+
+// Registration OTP — sends OTP without requiring existing account
+app.post('/api/auth/send-register-otp', async (req, res) => {
+  try {
+    const { email } = req.body
+    if (!email) return res.status(400).json({ ok: false, error: 'Email is required.' })
+    if (await User.findOne({ email: email.toLowerCase() })) return res.status(409).json({ ok: false, error: 'An account with this email already exists.' })
+
+    const code = generateOTP()
+    await saveOTP('reg_' + email.toLowerCase(), code)
+
+    const transporter = createTransporter()
+    if (!transporter) return res.status(503).json({ ok: false, error: 'Email service not configured.' })
+
+    await transporter.sendMail({
+      from: `"Stock Key Investments" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: `Verify your email — OTP: ${code}`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;background:#fff;">
+          <div style="background:linear-gradient(135deg,#1a1f2e 0%,#0d1117 100%);padding:28px;text-align:center;">
+            <h1 style="color:#D4AF37;margin:0;font-size:22px;">Stock Key Investments</h1>
+          </div>
+          <div style="padding:32px;text-align:center;">
+            <p style="color:#475569;font-size:14px;margin-bottom:8px;">Verify your email to create an account</p>
+            <div style="background:#f8f9fa;border:2px dashed #D4AF37;border-radius:12px;padding:20px;margin:16px 0;">
+              <p style="font-size:36px;font-weight:bold;letter-spacing:8px;color:#1a1f2e;margin:0;">${code}</p>
+            </div>
+            <p style="color:#9ca3af;font-size:12px;margin-top:16px;">This OTP expires in <strong>5 minutes</strong>.</p>
+            <p style="color:#9ca3af;font-size:12px;">If you didn't request this, please ignore this email.</p>
+          </div>
+          <div style="background:#f8f9fa;padding:16px;text-align:center;border-top:1px solid #e5e7eb;">
+            <p style="color:#9ca3af;font-size:11px;margin:0;">Stock Key Investments · SEBI Registered</p>
+          </div>
+        </div>
+      `,
+    })
+
+    res.json({ ok: true, message: `OTP sent to ${email}` })
+  } catch (err) { console.error('Send register OTP error:', err.message); res.status(500).json({ ok: false, error: 'Failed to send OTP.' }) }
+})
+
+// Verify registration OTP (no account needed)
+app.post('/api/auth/verify-register-otp', async (req, res) => {
+  try {
+    const { email, otp } = req.body
+    if (!email || !otp) return res.status(400).json({ ok: false, error: 'Email and OTP are required.' })
+
+    const result = await verifyAndConsumeOTP('reg_' + email.toLowerCase(), otp)
+    if (!result.ok) return res.status(401).json(result)
+
+    res.json({ ok: true, message: 'Email verified successfully.' })
+  } catch (err) { console.error('Verify register OTP error:', err.message); res.status(500).json({ ok: false, error: 'Failed to verify OTP.' }) }
+})
+
+// Verify login OTP (account must exist)
+app.post('/api/auth/verify-otp', async (req, res) => {
+  try {
+    const { email, otp } = req.body
+    if (!email || !otp) return res.status(400).json({ ok: false, error: 'Email and OTP are required.' })
+
+    const result = await verifyAndConsumeOTP(email.toLowerCase(), otp)
+    if (!result.ok) return res.status(401).json(result)
+
+    const user = await User.findOne({ email: email.toLowerCase() })
+    if (!user) return res.status(404).json({ ok: false, error: 'Account not found.' })
+
+    res.json({ ok: true, user: { id: user._id, name: user.name, email: user.email, role: user.role, customerId: user.customerId, createdAt: user.createdAt } })
+  } catch (err) { console.error('Verify OTP error:', err.message); res.status(500).json({ ok: false, error: 'Failed to verify OTP.' }) }
+})
+
 // Auth
 app.post('/api/auth/login', async (req, res) => {
   try {

@@ -4,7 +4,8 @@ import { useData } from '../../context/DataContext'
 import Badge, { statusColor } from '../../components/ui/Badge'
 import Modal from '../../components/ui/Modal'
 import InvestmentCertificate from '../../components/InvestmentCertificate'
-import { inr, formatDate, holdingValue } from '../../lib/utils'
+import Invoice from '../../components/Invoice'
+import { inr, formatDate, formatDateTime, timeAgo } from '../../lib/utils'
 import { IconEdit, IconTrash, IconCheck, IconDownload } from '../../components/icons'
 import { api } from '../../lib/api'
 import type { Customer, InvestmentPlanTier } from '../../types'
@@ -33,6 +34,7 @@ export default function AdminCustomers() {
   const [form, setForm] = useState<Omit<Customer, 'id'>>(emptyCustomer())
   const [viewing, setViewing] = useState<Customer | null>(null)
   const [certCustomer, setCertCustomer] = useState<Customer | null>(null)
+  const [invoiceCustomer, setInvoiceCustomer] = useState<Customer | null>(null)
   const [submitError, setSubmitError] = useState('')
   const photoRef = useRef<HTMLInputElement>(null)
 
@@ -129,16 +131,15 @@ export default function AdminCustomers() {
                 <th className="px-4 py-3 font-medium text-xs uppercase tracking-wide">Customer</th>
                 <th className="px-4 py-3 font-medium text-xs uppercase tracking-wide">Plan</th>
                 <th className="px-4 py-3 font-medium text-xs uppercase tracking-wide">Invested</th>
-                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wide">Holdings</th>
                 <th className="px-4 py-3 font-medium text-xs uppercase tracking-wide">KYC</th>
                 <th className="px-4 py-3 font-medium text-xs uppercase tracking-wide">Payment</th>
+                <th className="px-4 py-3 font-medium text-xs uppercase tracking-wide">Joined</th>
                 <th className="px-4 py-3 font-medium text-xs uppercase tracking-wide">Status</th>
                 <th className="px-4 py-3 font-medium text-xs uppercase tracking-wide text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-ink-100">
               {filtered.map((c) => {
-                const holdingsValue = c.holdings.reduce((s, h) => s + holdingValue(h.quantity, h.currentPrice), 0)
                 return (
                   <tr key={c.id} className="hover:bg-gold-50/30 transition-colors">
                     <td className="px-4 py-3">
@@ -149,10 +150,13 @@ export default function AdminCustomers() {
                     </td>
                     <td className="px-4 py-3"><Badge color="blue">{c.plan}</Badge></td>
                     <td className="px-4 py-3 font-medium tabular">{inr(c.investedAmount, true)}</td>
-                    <td className="px-4 py-3 tabular">{holdingsValue ? inr(holdingsValue, true) : <span className="text-ink-400">&mdash;</span>}</td>
                     <td className="px-4 py-3">{c.kycVerified ? <IconCheck className="h-4 w-4 text-emerald-600" /> : <span className="text-amber-500">Pending</span>}</td>
                     <td className="px-4 py-3">
                       <Badge color={c.paymentStatus === 'Verified' ? 'green' : c.paymentStatus === 'Rejected' ? 'red' : 'amber'}>{c.paymentStatus || 'Pending'}</Badge>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="text-ink-700 text-xs block">{formatDateTime(c.joinDate)}</span>
+                      <span className="text-ink-400 text-[10px]">{timeAgo(c.joinDate)}</span>
                     </td>
                     <td className="px-4 py-3"><Badge color={statusColor(c.status)}>{c.status}</Badge></td>
                     <td className="px-4 py-3">
@@ -290,9 +294,12 @@ export default function AdminCustomers() {
                 </div>
               </div>
             )}
-            <div className="pt-3 border-t border-ink-100">
-              <button onClick={() => { setCertCustomer(viewing); setViewing(null) }} className="btn-gold text-sm w-full flex items-center justify-center gap-2">
-                <IconDownload className="h-4 w-4" /> Generate Investment Certificate
+            <div className="pt-3 border-t border-ink-100 space-y-2">
+              <button onClick={() => { setInvoiceCustomer(viewing); setViewing(null) }} className="btn-gold text-sm w-full flex items-center justify-center gap-2">
+                <IconDownload className="h-4 w-4" /> Generate Invoice
+              </button>
+              <button onClick={() => { setCertCustomer(viewing); setViewing(null) }} className="btn-outline text-sm w-full flex items-center justify-center gap-2">
+                <IconDownload className="h-4 w-4" /> Investment Certificate
               </button>
             </div>
           </div>
@@ -302,6 +309,11 @@ export default function AdminCustomers() {
       {/* Certificate modal */}
       <Modal open={!!certCustomer} onClose={() => setCertCustomer(null)} title="Investment Certificate" size="xl">
         {certCustomer && <InvestmentCertificate customer={certCustomer} />}
+      </Modal>
+
+      {/* Invoice modal */}
+      <Modal open={!!invoiceCustomer} onClose={() => setInvoiceCustomer(null)} title="Tax Invoice" size="xl">
+        {invoiceCustomer && <Invoice customer={invoiceCustomer} />}
       </Modal>
     </DashboardShell>
   )
