@@ -28,20 +28,19 @@ export default {
           200: '#F2E29A',
           300: '#EBD266',
           400: '#E2BF3C',
-          500: '#D4AF37',  // primary gold
+          500: '#D4AF37',
           600: '#B8941F',
           700: '#947516',
           800: '#6E560F',
           900: '#4A3908',
         },
-        // keep brand for backward-compat aliases used in some components
-        brand: {
-          50: '#f0f6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
-          400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
-          800: '#1e40af', 900: '#1e3a8a', 950: '#172554',
+        sky: {
+          400: '#38bdf8',
+          500: '#0ea5e9',
         },
-        accent: {
-          400: '#34d399', 500: '#10b981', 600: '#059669',
+        violet: {
+          400: '#a78bfa',
+          500: '#8b5cf6',
         },
       },
       fontFamily: {
@@ -57,11 +56,15 @@ export default {
         'premium-lg': '0 1px 2px rgba(16,24,40,0.04), 0 24px 60px -12px rgba(16,24,40,0.14)',
         'gold': '0 8px 28px -6px rgba(212,175,55,0.35)',
         'gold-glow': '0 0 0 1px rgba(212,175,55,0.25), 0 12px 40px -8px rgba(212,175,55,0.3)',
+        '3d': '0 20px 48px rgba(0,0,0,0.25)',
+        'glass': '0 8px 32px rgba(0,0,0,0.25)',
       },
       backgroundImage: {
         'gold-gradient': 'linear-gradient(135deg, #F2E29A 0%, #D4AF37 45%, #B8941F 100%)',
         'gold-sheen': 'linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.5) 50%, transparent 70%)',
         'ink-radial': 'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(212,175,55,0.18) 0%, transparent 60%)',
+        'sky-gradient': 'linear-gradient(145deg, #38bdf8, #6366f1)',
+        'sky-gradient-soft': 'linear-gradient(145deg, rgba(56,189,248,0.16), rgba(99,102,241,0.1))',
       },
       keyframes: {
         'fade-up': {
@@ -84,6 +87,10 @@ export default {
           '0%, 100%': { opacity: '0.5' },
           '50%': { opacity: '1' },
         },
+        'float': {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-12px)' },
+        },
       },
       animation: {
         'fade-up': 'fade-up 0.6s cubic-bezier(0.16,1,0.3,1) both',
@@ -91,6 +98,7 @@ export default {
         'shimmer': 'shimmer 2.5s linear infinite',
         'ticker': 'ticker 40s linear infinite',
         'glow-pulse': 'glow-pulse 4s ease-in-out infinite',
+        'float': 'float 4s ease-in-out infinite',
       },
     },
   },
