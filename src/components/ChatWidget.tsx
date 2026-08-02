@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { getBotResponse, getWelcomeMessage, generateId, personalities, type ChatMessage, type AIPersonality } from '../lib/faqBot'
+import { initVoice, speak, stopSpeaking, isSpeaking } from '../lib/voice'
 import { IconChart } from './icons'
 
 export default function ChatWidget() {
@@ -12,26 +13,32 @@ export default function ChatWidget() {
   const [input, setInput] = useState('')
   const [typing, setTyping] = useState(false)
   const [listening, setListening] = useState(false)
+  const [voiceEnabled, setVoiceEnabled] = useState(true)
+  const [speakingMsgId, setSpeakingMsgId] = useState<string | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const recognitionRef = useRef<any>(null)
+  const voiceRef = useRef<SpeechSynthesisVoice | null>(null)
 
-  // Expose open function globally for hero button
+  // Init voice on mount
   useEffect(() => {
+    initVoice().then(v => { voiceRef.current = v })
     window.__openChat = () => { setOpen(true); setFullScreen(true) }
-    return () => { delete window.__openChat }
+    return () => { delete window.__openChat; stopSpeaking() }
   }, [])
 
   // Initialize with personality greeting
   useEffect(() => {
     if (messages.length === 0) {
-      setMessages([{
-        id: generateId(),
-        role: 'assistant',
-        text: activePersonality.greeting,
-        timestamp: Date.now(),
-        personality: activePersonality.id,
-      }])
+      const greeting = { id: generateId(), role: 'assistant' as const, text: activePersonality.greeting, timestamp: Date.now(), personality: activePersonality.id }
+      setMessages([greeting])
+      // Speak greeting
+      if (voiceEnabled) {
+        setTimeout(() => {
+          speak(activePersonality.greeting, voiceRef.current).then(() => setSpeakingMsgId(null))
+          setSpeakingMsgId(greeting.id)
+        }, 500)
+      }
     }
   }, [])
 
@@ -46,18 +53,33 @@ export default function ChatWidget() {
   const switchPersonality = (p: AIPersonality) => {
     setActivePersonality(p)
     setShowPersonalityPicker(false)
-    setMessages([{
-      id: generateId(),
-      role: 'assistant',
-      text: p.greeting,
-      timestamp: Date.now(),
-      personality: p.id,
-    }])
+    stopSpeaking()
+    const greeting = { id: generateId(), role: 'assistant' as const, text: p.greeting, timestamp: Date.now(), personality: p.id }
+    setMessages([greeting])
+    if (voiceEnabled) {
+      setTimeout(() => {
+        speak(p.greeting, voiceRef.current).then(() => setSpeakingMsgId(null))
+        setSpeakingMsgId(greeting.id)
+      }, 300)
+    }
+  }
+
+  const toggleVoice = () => {
+    if (voiceEnabled) stopSpeaking()
+    setVoiceEnabled(!voiceEnabled)
+  }
+
+  const stopAllSpeech = () => {
+    stopSpeaking()
+    setSpeakingMsgId(null)
   }
 
   const send = useCallback((text?: string) => {
     const msg = (text || input).trim()
     if (!msg) return
+
+    stopSpeaking()
+    setSpeakingMsgId(null)
 
     const userMsg: ChatMessage = { id: generateId(), role: 'user', text: msg, timestamp: Date.now() }
     setMessages((m) => [...m, userMsg])
@@ -66,10 +88,19 @@ export default function ChatWidget() {
 
     setTimeout(() => {
       const reply = getBotResponse(msg)
-      setMessages((m) => [...m, { id: generateId(), role: 'assistant', text: reply, timestamp: Date.now(), personality: activePersonality.id }])
+      const replyMsg = { id: generateId(), role: 'assistant' as const, text: reply, timestamp: Date.now(), personality: activePersonality.id }
+      setMessages((m) => [...m, replyMsg])
       setTyping(false)
+
+      // Speak the reply
+      if (voiceEnabled) {
+        setTimeout(() => {
+          speak(reply, voiceRef.current).then(() => setSpeakingMsgId(null))
+          setSpeakingMsgId(replyMsg.id)
+        }, 200)
+      }
     }, 600 + Math.random() * 800)
-  }, [input, activePersonality])
+  }, [input, activePersonality, voiceEnabled])
 
   const handleKey = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }
@@ -81,13 +112,13 @@ export default function ChatWidget() {
       alert('Voice input is not supported in your browser. Try Chrome.')
       return
     }
+    stopSpeaking()
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     const recognition = new SpeechRecognition()
     recognitionRef.current = recognition
     recognition.continuous = false
     recognition.interimResults = true
     recognition.lang = 'en-US'
-
     recognition.onresult = (event: any) => {
       const transcript = Array.from(event.results).map((r: any) => r[0].transcript).join('')
       setInput(transcript)
@@ -114,9 +145,7 @@ export default function ChatWidget() {
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
           </button>
         ) : (
-          <button onClick={() => setActivePersonality(activePersonality)} className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br text-white shadow-lg flex-shrink-0" style={{ background: `linear-gradient(135deg, var(--tw-gradient-stops))` }}>
-            <span className={`h-9 w-9 rounded-xl flex items-center justify-center text-lg bg-gradient-to-br ${activePersonality.color}`}>{activePersonality.avatar}</span>
-          </button>
+          <span className={`h-9 w-9 rounded-xl flex items-center justify-center text-lg bg-gradient-to-br ${activePersonality.color} flex-shrink-0 shadow-lg`}>{activePersonality.avatar}</span>
         )}
         <div className="flex-1 min-w-0">
           {showPersonalityPicker ? (
@@ -124,12 +153,24 @@ export default function ChatWidget() {
           ) : (
             <>
               <h3 className="text-sm font-bold text-gray-50 font-display">{activePersonality.name} — {activePersonality.role}</h3>
-              <p className="text-xs text-gray-400">Ask about Stock Key services</p>
+              <p className="text-xs text-gray-400">{typing ? 'Thinking...' : speakingMsgId ? 'Speaking...' : 'Online'}</p>
             </>
           )}
         </div>
         {!showPersonalityPicker && (
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
+            <button onClick={toggleVoice} className={`p-2 rounded-lg transition-all ${voiceEnabled ? 'text-sky-400 bg-sky-400/10' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-700/50'}`} title={voiceEnabled ? 'Voice ON' : 'Voice OFF'}>
+              {voiceEnabled ? (
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
+              ) : (
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /><path strokeLinecap="round" strokeLinejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" /></svg>
+              )}
+            </button>
+            {speakingMsgId && (
+              <button onClick={stopAllSpeech} className="p-2 text-red-400 hover:bg-gray-700/50 rounded-lg transition-all" title="Stop speaking">
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" /></svg>
+              </button>
+            )}
             <button onClick={() => setShowPersonalityPicker(true)} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-all" title="Change assistant">
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
             </button>
@@ -146,7 +187,7 @@ export default function ChatWidget() {
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" /></svg>
               </button>
             )}
-            <button onClick={() => { setOpen(false); setFullScreen(false) }} className="p-2 text-gray-400 hover:text-red-400 hover:bg-gray-700/50 rounded-lg transition-all" title="Close">
+            <button onClick={() => { stopSpeaking(); setOpen(false); setFullScreen(false) }} className="p-2 text-gray-400 hover:text-red-400 hover:bg-gray-700/50 rounded-lg transition-all" title="Close">
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
@@ -163,7 +204,7 @@ export default function ChatWidget() {
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-gray-100">{p.name}</p>
                 <p className="text-xs text-gray-400">{p.role}</p>
-                <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{p.style === 'professional' ? 'Formal & data-driven' : p.style === 'friendly' ? 'Warm & conversational' : p.style === 'expert' ? 'Deep market knowledge' : 'Caring & supportive'}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{p.style === 'professional' ? 'Formal & data-driven' : p.style === 'friendly' ? 'Warm & conversational' : p.style === 'expert' ? 'Deep market knowledge' : 'Caring & supportive'}</p>
               </div>
               {activePersonality.id === p.id && (
                 <svg className="h-5 w-5 text-sky-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -188,6 +229,15 @@ export default function ChatWidget() {
                   <p className="whitespace-pre-wrap">{m.text.split('**').map((part, i) =>
                     i % 2 === 1 ? <strong key={i} className="text-gray-50 font-semibold">{part}</strong> : part
                   )}</p>
+                  {m.role === 'assistant' && speakingMsgId === m.id && (
+                    <div className="flex items-center gap-1 mt-1.5">
+                      <span className="w-1 h-1 rounded-full bg-sky-400 animate-pulse" />
+                      <span className="w-1 h-1.5 rounded-full bg-sky-400 animate-pulse" style={{ animationDelay: '0.15s' }} />
+                      <span className="w-1 h-2 rounded-full bg-sky-400 animate-pulse" style={{ animationDelay: '0.3s' }} />
+                      <span className="w-1 h-1.5 rounded-full bg-sky-400 animate-pulse" style={{ animationDelay: '0.45s' }} />
+                      <span className="w-1 h-1 rounded-full bg-sky-400 animate-pulse" style={{ animationDelay: '0.6s' }} />
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -226,13 +276,14 @@ export default function ChatWidget() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKey}
-                placeholder="Type or speak..."
+                placeholder={listening ? 'Listening...' : 'Type or speak...'}
                 className="flex-1 bg-transparent text-sm text-gray-100 placeholder:text-gray-500 outline-none"
+                disabled={listening}
               />
               <button
                 onMouseDown={listening ? stopListening : startListening}
                 className={`h-8 w-8 rounded-lg flex items-center justify-center transition-all flex-shrink-0 ${listening ? 'bg-red-500 animate-pulse text-white' : 'bg-gray-700/50 text-gray-400 hover:text-white hover:bg-gray-600/50'}`}
-                title={listening ? 'Stop listening' : 'Voice input'}
+                title={listening ? 'Stop listening' : 'Speak now'}
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
               </button>

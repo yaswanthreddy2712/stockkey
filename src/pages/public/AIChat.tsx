@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { getBotResponse, getWelcomeMessage, generateId, personalities, type ChatMessage, type AIPersonality } from '../../lib/faqBot'
+import { initVoice, speak, stopSpeaking } from '../../lib/voice'
 import { IconChart } from '../../components/icons'
 
 const quickActions = [
@@ -19,18 +20,27 @@ export default function AIChat() {
   const [input, setInput] = useState('')
   const [typing, setTyping] = useState(false)
   const [listening, setListening] = useState(false)
+  const [voiceEnabled, setVoiceEnabled] = useState(true)
+  const [speakingMsgId, setSpeakingMsgId] = useState<string | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const recognitionRef = useRef<any>(null)
+  const voiceRef = useRef<SpeechSynthesisVoice | null>(null)
 
   useEffect(() => {
-    setMessages([{
-      id: generateId(),
-      role: 'assistant',
-      text: activePersonality.greeting,
-      timestamp: Date.now(),
-      personality: activePersonality.id,
-    }])
+    initVoice().then(v => { voiceRef.current = v })
+    return () => stopSpeaking()
+  }, [])
+
+  useEffect(() => {
+    const greeting = { id: generateId(), role: 'assistant' as const, text: activePersonality.greeting, timestamp: Date.now(), personality: activePersonality.id }
+    setMessages([greeting])
+    if (voiceEnabled) {
+      setTimeout(() => {
+        speak(activePersonality.greeting, voiceRef.current).then(() => setSpeakingMsgId(null))
+        setSpeakingMsgId(greeting.id)
+      }, 500)
+    }
   }, [activePersonality])
 
   useEffect(() => {
@@ -45,6 +55,9 @@ export default function AIChat() {
     const msg = (text || input).trim()
     if (!msg) return
 
+    stopSpeaking()
+    setSpeakingMsgId(null)
+
     const userMsg: ChatMessage = { id: generateId(), role: 'user', text: msg, timestamp: Date.now() }
     setMessages((m) => [...m, userMsg])
     setInput('')
@@ -52,10 +65,18 @@ export default function AIChat() {
 
     setTimeout(() => {
       const reply = getBotResponse(msg)
-      setMessages((m) => [...m, { id: generateId(), role: 'assistant', text: reply, timestamp: Date.now(), personality: activePersonality.id }])
+      const replyMsg = { id: generateId(), role: 'assistant' as const, text: reply, timestamp: Date.now(), personality: activePersonality.id }
+      setMessages((m) => [...m, replyMsg])
       setTyping(false)
+
+      if (voiceEnabled) {
+        setTimeout(() => {
+          speak(reply, voiceRef.current).then(() => setSpeakingMsgId(null))
+          setSpeakingMsgId(replyMsg.id)
+        }, 200)
+      }
     }, 600 + Math.random() * 800)
-  }, [input, activePersonality])
+  }, [input, activePersonality, voiceEnabled])
 
   const handleKey = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }
@@ -66,6 +87,8 @@ export default function AIChat() {
       alert('Voice input is not supported in your browser. Try Chrome.')
       return
     }
+    stopSpeaking()
+    setSpeakingMsgId(null)
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     const recognition = new SpeechRecognition()
     recognitionRef.current = recognition
@@ -87,6 +110,11 @@ export default function AIChat() {
     setListening(false)
   }
 
+  const toggleVoice = () => {
+    if (voiceEnabled) stopSpeaking()
+    setVoiceEnabled(!voiceEnabled)
+  }
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg-dark)' }}>
       {/* Header */}
@@ -99,7 +127,6 @@ export default function AIChat() {
         </Link>
         <div className="h-6 w-px bg-gray-700" />
 
-        {/* Active personality */}
         <button onClick={() => setShowPersonalityPicker(!showPersonalityPicker)}
           className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-700/50 bg-gray-800/40 hover:bg-gray-700/40 transition-all">
           <span className={`h-6 w-6 rounded-lg flex items-center justify-center text-sm bg-gradient-to-br ${activePersonality.color}`}>{activePersonality.avatar}</span>
@@ -108,15 +135,28 @@ export default function AIChat() {
         </button>
 
         <div className="flex-1" />
-        <Link to="/" className="text-xs text-gray-400 hover:text-gray-200 transition-colors">&larr; Back to Home</Link>
+        <span className="text-xs text-gray-500 hidden sm:inline">{typing ? 'Thinking...' : speakingMsgId ? 'Speaking...' : 'Online'}</span>
+        <button onClick={toggleVoice} className={`p-2 rounded-lg transition-all ${voiceEnabled ? 'text-sky-400 bg-sky-400/10' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-700/50'}`} title={voiceEnabled ? 'Voice ON' : 'Voice OFF'}>
+          {voiceEnabled ? (
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
+          ) : (
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /><path strokeLinecap="round" strokeLinejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" /></svg>
+          )}
+        </button>
+        {speakingMsgId && (
+          <button onClick={() => { stopSpeaking(); setSpeakingMsgId(null) }} className="p-2 text-red-400 hover:bg-gray-700/50 rounded-lg transition-all" title="Stop speaking">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" /></svg>
+          </button>
+        )}
+        <Link to="/" className="text-xs text-gray-400 hover:text-gray-200 transition-colors">&larr; Home</Link>
       </header>
 
-      {/* Personality Picker Dropdown */}
+      {/* Personality Picker */}
       {showPersonalityPicker && (
         <div className="border-b px-4 sm:px-6 py-4" style={{ borderColor: 'var(--border-dark)', background: 'var(--surface-dark)' }}>
           <div className="max-w-2xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-2">
             {personalities.map((p) => (
-              <button key={p.id} onClick={() => { setActivePersonality(p); setShowPersonalityPicker(false) }}
+              <button key={p.id} onClick={() => { setActivePersonality(p); setShowPersonalityPicker(false); stopSpeaking() }}
                 className={`flex items-center gap-2 p-2.5 rounded-xl border transition-all text-left ${activePersonality.id === p.id ? 'border-sky-500/50 bg-sky-500/10' : 'border-gray-700/50 bg-gray-800/30 hover:bg-gray-700/40'}`}>
                 <span className={`h-10 w-10 rounded-lg flex items-center justify-center text-xl bg-gradient-to-br ${p.color} flex-shrink-0`}>{p.avatar}</span>
                 <div className="min-w-0">
@@ -145,6 +185,13 @@ export default function AIChat() {
                 <p className="whitespace-pre-wrap">{m.text.split('**').map((part, i) =>
                   i % 2 === 1 ? <strong key={i} className="text-gray-50 font-semibold">{part}</strong> : part
                 )}</p>
+                {m.role === 'assistant' && speakingMsgId === m.id && (
+                  <div className="flex items-center gap-1 mt-2">
+                    {[1,2,3,4,5].map(i => (
+                      <span key={i} className="w-1 rounded-full bg-sky-400 animate-pulse" style={{ height: `${8 + Math.random() * 12}px`, animationDelay: `${i * 0.15}s` }} />
+                    ))}
+                  </div>
+                )}
               </div>
               {m.role === 'user' && (
                 <div className="h-8 w-8 rounded-full bg-gray-700 flex items-center justify-center flex-shrink-0 ml-3 mt-1 text-xs font-bold text-gray-300">U</div>
@@ -167,7 +214,7 @@ export default function AIChat() {
         </div>
       </div>
 
-      {/* Quick Actions (show only at start) */}
+      {/* Quick Actions */}
       {messages.length <= 2 && (
         <div className="px-4 sm:px-6 pb-3">
           <div className="max-w-2xl mx-auto">
@@ -195,13 +242,14 @@ export default function AIChat() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKey}
-              placeholder="Type or speak your question..."
+              placeholder={listening ? 'Listening... speak now' : 'Type or speak your question...'}
               className="flex-1 bg-transparent text-sm text-gray-100 placeholder:text-gray-500 outline-none"
+              disabled={listening}
             />
             <button
               onMouseDown={listening ? stopListening : startListening}
               className={`h-10 w-10 rounded-xl flex items-center justify-center transition-all flex-shrink-0 ${listening ? 'bg-red-500 animate-pulse text-white' : 'bg-gray-700/50 text-gray-400 hover:text-white hover:bg-gray-600/50'}`}
-              title={listening ? 'Stop listening' : 'Voice input'}
+              title={listening ? 'Stop listening' : 'Speak now'}
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
             </button>
@@ -213,8 +261,10 @@ export default function AIChat() {
           <p className="text-center text-xs text-gray-600 mt-2">
             {listening ? (
               <span className="text-red-400 animate-pulse">Listening... speak now</span>
+            ) : speakingMsgId ? (
+              <span className="text-sky-400">AI is speaking... click stop to interrupt</span>
             ) : (
-              'Click mic for voice input • AI-powered answers about Stock Key services'
+              'Voice input + voice output enabled • Click mic to speak'
             )}
           </p>
         </div>
