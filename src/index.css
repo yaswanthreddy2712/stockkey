@@ -96,7 +96,7 @@
   .label-light { @apply block text-xs font-semibold uppercase tracking-wide text-ink-500 mb-1.5; }
 
   /* ── Cards ── */
-  .premium-card { @apply rounded-2xl shadow-premium transition-all duration-300; border: 1px solid var(--border-dark); background: var(--card-dark); }
+  .premium-card { @apply rounded-2xl shadow-premium transition-all duration-300; border: 1px solid var(--border-light); background: #ffffff; }
   .premium-card-hover { @apply hover:shadow-premium-lg hover:-translate-y-1; }
   .glass-card { @apply rounded-2xl backdrop-blur-xl shadow-glass; border: 1px solid var(--glass-border); background: var(--glass-bg); }
   .glass-card-hover { @apply transition-all duration-300; }
