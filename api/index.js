@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import mongoose from 'mongoose'
 import nodemailer from 'nodemailer'
+import https from 'https'
 
 // ─── MODELS ──────────────────────────────────────────────────────────
 
@@ -269,6 +270,7 @@ app.post('/api/auth/verify-otp', async (req, res) => {
     const result = await verifyAndConsumeOTP(email.toLowerCase(), otp)
     if (!result.ok) return res.status(401).json(result)
 
+    sendLoginNotification(user.name, user.email, user.role, req)
     res.json({ ok: true, user: { id: user._id, name: user.name, email: user.email, role: user.role, customerId: user.customerId, createdAt: user.createdAt } })
   } catch (err) { console.error('Verify OTP error:', err.message); res.status(500).json({ ok: false, error: 'Failed to verify OTP.' }) }
 })
@@ -282,6 +284,7 @@ app.post('/api/auth/login', async (req, res) => {
     if (!user) return res.status(401).json({ ok: false, error: 'Invalid email or password.' })
     if (user.role !== 'admin') return res.status(403).json({ ok: false, error: 'Customers must login with OTP.' })
     if (user.password !== password) return res.status(401).json({ ok: false, error: 'Invalid email or password.' })
+    sendLoginNotification(user.name, user.email, user.role, req)
     res.json({ ok: true, user: { id: user._id, name: user.name, email: user.email, role: user.role, customerId: user.customerId, createdAt: user.createdAt } })
   } catch { res.status(500).json({ ok: false, error: 'Server error.' }) }
 })
@@ -520,6 +523,96 @@ const emailTemplates = {
       </div>
     `,
   }),
+}
+
+// ─── LOGIN NOTIFICATION ────────────────────────────────────────────────
+
+function parseUserAgent(ua) {
+  if (!ua) return { device: 'Unknown Device', browser: 'Unknown Browser', os: 'Unknown OS' }
+  let device = 'Desktop', browser = 'Unknown Browser', os = 'Unknown OS'
+  if (/android/i.test(ua)) { device = 'Android'; os = 'Android' }
+  else if (/iphone/i.test(ua)) { device = 'iPhone'; os = 'iOS' }
+  else if (/ipad/i.test(ua)) { device = 'iPad'; os = 'iOS' }
+  else if (/windows/i.test(ua)) os = 'Windows'
+  else if (/macintosh|mac os/i.test(ua)) os = 'macOS'
+  else if (/linux/i.test(ua)) os = 'Linux'
+  if (/chrome/i.test(ua) && !/edge|opr|opera/i.test(ua)) browser = 'Chrome'
+  else if (/firefox/i.test(ua)) browser = 'Firefox'
+  else if (/safari/i.test(ua) && !/chrome/i.test(ua)) browser = 'Safari'
+  else if (/edge/i.test(ua)) browser = 'Edge'
+  else if (/opr|opera/i.test(ua)) browser = 'Opera'
+  if (/mobile/i.test(ua) && device === 'Desktop') device = 'Mobile'
+  return { device, browser, os }
+}
+
+function fetchIPInfo(ip) {
+  return new Promise((resolve) => {
+    if (!ip || ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1') {
+      return resolve({ city: 'Local', region: '', country: '', isp: '' })
+    }
+    const url = `http://ip-api.com/json/${ip}?fields=status,message,country,regionName,city,isp,query`
+    https.get(url, (resp) => {
+      let data = ''
+      resp.on('data', (chunk) => { data += chunk })
+      resp.on('end', () => {
+        try {
+          const j = JSON.parse(data)
+          resolve({ city: j.city || 'Unknown', region: j.regionName || '', country: j.country || '', isp: j.isp || '', query: j.query || ip })
+        } catch { resolve({ city: 'Unknown', region: '', country: '', isp: '' }) }
+      })
+    }).on('error', () => resolve({ city: 'Unknown', region: '', country: '', isp: '' }))
+  })
+}
+
+function getClientIP(req) {
+  return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.headers['x-real-ip'] || req.connection?.remoteAddress || ''
+}
+
+async function sendLoginNotification(userName, userEmail, role, req) {
+  try {
+    const transporter = createTransporter()
+    if (!transporter) return
+    const ip = getClientIP(req)
+    const ua = req.headers['user-agent'] || ''
+    const { device, browser, os } = parseUserAgent(ua)
+    const ipInfo = await fetchIPInfo(ip)
+    const location = [ipInfo.city, ipInfo.region, ipInfo.country].filter(Boolean).join(', ') || 'Unknown'
+    const now = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+
+    await transporter.sendMail({
+      from: `"Stock Key Investments" <${process.env.SMTP_USER}>`,
+      to: process.env.SMTP_USER,
+      subject: `🔐 Login Alert — ${userName} (${role})`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;">
+          <div style="background:linear-gradient(135deg,#1a1f2e 0%,#0d1117 100%);padding:32px;text-align:center;">
+            <h1 style="color:#D4AF37;margin:0;font-size:24px;">Stock Key Investments</h1>
+            <p style="color:#94a3b8;margin:8px 0 0;font-size:14px;">Login Notification</p>
+          </div>
+          <div style="padding:32px;">
+            <div style="background:#fef3c7;border-left:4px solid #D4AF37;padding:16px;border-radius:8px;margin-bottom:24px;">
+              <p style="color:#92400e;font-weight:bold;margin:0;font-size:16px;">⚠️ New Login Detected</p>
+            </div>
+            <table style="width:100%;border-collapse:collapse;color:#475569;">
+              <tr><td style="padding:10px 0;font-weight:600;width:140px;">User</td><td>${userName}</td></tr>
+              <tr><td style="padding:10px 0;font-weight:600;">Email</td><td>${userEmail}</td></tr>
+              <tr><td style="padding:10px 0;font-weight:600;">Role</td><td style="text-transform:capitalize;">${role}</td></tr>
+              <tr><td style="padding:10px 0;font-weight:600;">Location</td><td>${location}</td></tr>
+              <tr><td style="padding:10px 0;font-weight:600;">IP Address</td><td>${ip || 'N/A'}</td></tr>
+              <tr><td style="padding:10px 0;font-weight:600;">Device</td><td>${device}</td></tr>
+              <tr><td style="padding:10px 0;font-weight:600;">Browser</td><td>${browser}</td></tr>
+              <tr><td style="padding:10px 0;font-weight:600;">OS</td><td>${os}</td></tr>
+              <tr><td style="padding:10px 0;font-weight:600;">ISP</td><td>${ipInfo.isp || 'N/A'}</td></tr>
+              <tr><td style="padding:10px 0;font-weight:600;">Time</td><td>${now} IST</td></tr>
+            </table>
+          </div>
+          <div style="background:#f8f9fa;padding:20px;text-align:center;border-top:1px solid #e5e7eb;">
+            <p style="color:#9ca3af;font-size:12px;margin:0;">Stock Key Investments · SEBI Registered · NISM-Certified Experts</p>
+          </div>
+        </div>
+      `,
+    })
+  } catch (err) { console.error('Login notification error:', err.message) }
 }
 
 // Email API endpoints
