@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../lib/useAuth';
+import { useAuth } from '../../context/AuthContext';
 import { Mail, Send, Users, CheckCircle, Clock, AlertCircle, LayoutDashboard, TrendingUp, Briefcase, FileText, ArrowUpRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 

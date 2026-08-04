@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../lib/useAuth';
+import { useAuth } from '../../context/AuthContext';
 import { TrendingUp, Search, Filter, Plus, Mail, Phone, Calendar, ArrowUpRight, LayoutDashboard, Users, Briefcase, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -25,7 +25,11 @@ const statusConfig = {
   LOST: { color: 'bg-red-500/10 text-red-400 border-red-500/20', icon: XCircle, label: 'Lost' }
 };
 
-export default function AdminLeads() {
+interface AdminLeadsProps {
+  type?: string;
+}
+
+export default function AdminLeads({ type }: AdminLeadsProps) {
   const { user, logout } = useAuth();
   const [leads, setLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +40,8 @@ export default function AdminLeads() {
   useEffect(() => {
     const fetchLeads = async () => {
       try {
-        const res = await fetch('/api/leads', {
+        const url = type ? `/api/leads?type=${type}` : '/api/leads';
+        const res = await fetch(url, {
           headers: { Authorization: `Bearer ${localStorage.getItem('admin_token')}` }
         });
         if (res.ok) {
@@ -51,7 +56,7 @@ export default function AdminLeads() {
     };
 
     fetchLeads();
-  }, []);
+  }, [type]);
 
   const filteredLeads = leads.filter(lead => {
     const matchesSearch = lead.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||

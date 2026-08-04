@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../lib/useAuth';
+import { useAuth } from '../../context/AuthContext';
 import { Users, Search, Filter, Download, MoreHorizontal, Mail, Phone, Calendar, ArrowUpRight, LayoutDashboard, TrendingUp, Briefcase } from 'lucide-react';
 import { motion } from 'framer-motion';
 
