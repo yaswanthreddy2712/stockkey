@@ -1,172 +1,300 @@
-import { useState, useEffect } from 'react'
-import DashboardShell from '../../components/DashboardShell'
-import { useData } from '../../context/DataContext'
-import { api } from '../../lib/api'
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../../lib/useAuth';
+import { Mail, Send, Users, CheckCircle, Clock, AlertCircle, LayoutDashboard, TrendingUp, Briefcase, FileText, ArrowUpRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 
-const templates = [
-  { key: 'welcome', name: 'Welcome Email', desc: 'Sent when a new customer registers' },
-  { key: 'paymentVerified', name: 'Payment Verified', desc: 'Sent when admin verifies payment' },
-  { key: 'paymentRejected', name: 'Payment Rejected', desc: 'Sent when admin rejects payment' },
-  { key: 'monthlyPayout', name: 'Monthly Payout', desc: 'Sent when monthly payout is credited' },
-]
+const fadeIn = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+};
 
 export default function AdminBroadcast() {
-  const { customers } = useData()
-  const [smtpConfigured, setSmtpConfigured] = useState<boolean | null>(null)
-  const [smtpHost, setSmtpHost] = useState('')
-  const [smtpUser, setSmtpUser] = useState('')
-  const [mode, setMode] = useState<'broadcast' | 'single' | 'templates'>('broadcast')
-  const [subject, setSubject] = useState('')
-  const [body, setBody] = useState('')
-  const [audience, setAudience] = useState('All')
-  const [singleEmail, setSingleEmail] = useState('')
-  const [singleTemplate, setSingleTemplate] = useState('welcome')
-  const [sending, setSending] = useState(false)
-  const [result, setResult] = useState('')
+  const { user, logout } = useAuth();
+  const [customers, setCustomers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [subject, setSubject] = useState('');
+  const [message, setMessage] = useState('');
+  const [template, setTemplate] = useState('');
+  const [sent, setSent] = useState(false);
+  const [sentCount, setSentCount] = useState(0);
 
   useEffect(() => {
-    api.checkEmailConfig().then((res) => {
-      setSmtpConfigured(res.configured)
-      setSmtpHost(res.host || '')
-      setSmtpUser(res.user || '')
-    }).catch(() => setSmtpConfigured(false))
-  }, [])
+    const fetchCustomers = async () => {
+      try {
+        const res = await fetch('/api/customers', {
+          headers: { Authorization: `Bearer ${localStorage.getItem('admin_token')}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setCustomers(data.customers || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch customers:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleBroadcast = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSending(true)
-    setResult('')
-    try {
-      const res = await api.broadcastEmail(subject, body, audience)
-      if (res.error) { setResult(`Error: ${res.error}`) }
-      else { setResult(`Sent to ${res.sent} customers (${res.failed} failed out of ${res.total})`); setSubject(''); setBody('') }
-    } catch (err: any) { setResult(`Failed: ${err.message}`) }
-    setSending(false)
-  }
+    fetchCustomers();
+  }, []);
 
-  const handleSingle = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!singleEmail) return
-    setSending(true)
-    setResult('')
+  const templates = [
+    {
+      name: 'Welcome',
+      subject: 'Welcome to Stock Key Investments',
+      message: 'Dear {{name}},\n\nThank you for joining Stock Key Investments! We are excited to have you on board.\n\nYour account is now active and ready to use. You can explore our investment options, track your portfolio, and connect with our team.\n\nIf you have any questions, feel free to reach out.\n\nBest regards,\nStock Key Investments Team'
+    },
+    {
+      name: 'Portfolio Update',
+      subject: 'Your Portfolio Update',
+      message: 'Dear {{name}},\n\nHere is your monthly portfolio update:\n\nYour portfolio value: ₹{{value}}\nTotal holdings: {{holdings}}\n\nLog in to view detailed performance and make adjustments.\n\nBest regards,\nStock Key Investments Team'
+    },
+    {
+      name: 'Market Insights',
+      subject: 'Weekly Market Insights',
+      message: 'Dear {{name}},\n\nHere are this week\'s market insights:\n\n• Nifty 50: Up 2.3%\n• Sensex: Up 1.8%\n• Top performing sector: IT\n\nOur analysts recommend maintaining a balanced portfolio approach.\n\nBest regards,\nStock Key Investments Team'
+    }
+  ];
+
+  const handleSendBroadcast = async () => {
+    if (!subject || !message) return;
+    
+    setSending(true);
     try {
-      const c = customers.find((c) => c.email === singleEmail)
-      const res = await api.sendEmail(singleEmail, singleTemplate, { name: c?.name || 'Investor', amount: c?.monthlyPayout })
-      if (res.error) setResult(`Error: ${res.error}`)
-      else setResult(`Email sent to ${singleEmail}`)
-    } catch (err: any) { setResult(`Failed: ${err.message}`) }
-    setSending(false)
-  }
+      const personalizedMessage = message.replace(/\{\{name\}\}/g, '{{name}}');
+      
+      const res = await fetch('/api/broadcast', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('admin_token')}`
+        },
+        body: JSON.stringify({
+          subject,
+          message: personalizedMessage,
+          recipients: customers.map(c => c.email)
+        })
+      });
+
+      if (res.ok) {
+        setSent(true);
+        setSentCount(customers.length);
+      }
+    } catch (error) {
+      console.error('Failed to send broadcast:', error);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const applyTemplate = (tpl: typeof templates[0]) => {
+    setSubject(tpl.subject);
+    setMessage(tpl.message);
+    setTemplate(tpl.name);
+  };
 
   return (
-    <DashboardShell variant="admin">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-ink-900 font-display">Email Center</h1>
-        <p className="text-ink-500 text-sm">Send promotional emails, broadcast updates, and manage transactional templates.</p>
-      </div>
-
-      {/* SMTP Status */}
-      <div className={`premium-card p-4 mb-6 flex items-center gap-3 ${smtpConfigured === false ? 'border-l-4 border-amber-500' : smtpConfigured ? 'border-l-4 border-emerald-500' : ''}`}>
-        <div className={`h-3 w-3 rounded-full ${smtpConfigured ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-        <div>
-          <p className="text-sm font-semibold text-ink-800">
-            {smtpConfigured === null ? 'Checking SMTP...' : smtpConfigured ? 'Gmail SMTP — Active' : 'SMTP Not Configured'}
-          </p>
-          {smtpConfigured && <p className="text-xs text-ink-400">{smtpHost} &middot; {smtpUser}</p>}
-          {!smtpConfigured && smtpConfigured !== null && (
-            <p className="text-xs text-ink-500 mt-1">
-              Add SMTP env vars to Vercel settings.
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Mode tabs */}
-      <div className="flex gap-2 mb-6">
-        {([['broadcast', 'Broadcast to All'], ['single', 'Send to One'], ['templates', 'Templates']] as const).map(([k, label]) => (
-          <button key={k} onClick={() => setMode(k)} className={`rounded-lg px-4 py-2 text-sm font-medium transition ${mode === k ? 'bg-gold-500 text-ink-900' : 'bg-white text-ink-600 border border-ink-200 hover:border-gold-500/30'}`}>{label}</button>
-        ))}
-      </div>
-
-      {result && (
-        <div className={`rounded-xl px-4 py-3 text-sm mb-6 ${result.startsWith('Error') || result.startsWith('Failed') ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}`}>{result}</div>
-      )}
-
-      {/* Broadcast */}
-      {mode === 'broadcast' && (
-        <form onSubmit={handleBroadcast} className="premium-card p-6 space-y-4">
-          <h3 className="font-bold text-ink-800 font-display">Broadcast Email</h3>
-          <div>
-            <label className="label">Audience</label>
-            <select className="input" value={audience} onChange={(e) => setAudience(e.target.value)}>
-              {['All', 'Active', 'Pending'].map((a) => <option key={a} value={a}>{a} ({a === 'All' ? customers.length : customers.filter((c) => c.status === a).length} customers)</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="label">Subject *</label>
-            <input className="input" required value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="e.g. Market Update: Q4 Results Are In!" />
-          </div>
-          <div>
-            <label className="label">Email Body *</label>
-            <textarea className="input" rows={8} required value={body} onChange={(e) => setBody(e.target.value)} placeholder="Write your email content here. Use {name} to personalize with customer name." />
-          </div>
-          <div className="flex justify-end">
-            <button type="submit" disabled={sending || !smtpConfigured} className="btn-gold disabled:opacity-50">
-              {sending ? 'Sending...' : `Send to ${audience === 'All' ? customers.length : customers.filter((c) => c.status === audience).length} customers`}
-            </button>
-          </div>
-        </form>
-      )}
-
-      {/* Single email */}
-      {mode === 'single' && (
-        <form onSubmit={handleSingle} className="premium-card p-6 space-y-4">
-          <h3 className="font-bold text-ink-800 font-display">Send Transactional Email</h3>
-          <div>
-            <label className="label">Recipient Email *</label>
-            <input className="input" required type="email" value={singleEmail} onChange={(e) => setSingleEmail(e.target.value)} placeholder="customer@example.com" list="customer-emails" />
-            <datalist id="customer-emails">
-              {customers.map((c) => <option key={c.id} value={c.email}>{c.name}</option>)}
-            </datalist>
-          </div>
-          <div>
-            <label className="label">Template *</label>
-            <select className="input" value={singleTemplate} onChange={(e) => setSingleTemplate(e.target.value)}>
-              {templates.map((t) => <option key={t.key} value={t.key}>{t.name} — {t.desc}</option>)}
-            </select>
-          </div>
-          <div className="flex justify-end">
-            <button type="submit" disabled={sending || !smtpConfigured} className="btn-gold disabled:opacity-50">
-              {sending ? 'Sending...' : 'Send Email'}
-            </button>
-          </div>
-        </form>
-      )}
-
-      {/* Templates preview */}
-      {mode === 'templates' && (
-        <div className="space-y-4">
-          {templates.map((t) => (
-            <div key={t.key} className="premium-card p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-bold text-ink-800">{t.name}</h4>
-                  <p className="text-sm text-ink-500">{t.desc}</p>
-                </div>
-                <button onClick={() => { setMode('single'); setSingleTemplate(t.key) }} className="btn-outline text-xs">Use Template</button>
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-slate-950 to-gray-900">
+      {/* Header */}
+      <div className="bg-gray-900/50 backdrop-blur-xl border-b border-gray-800/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-3">
+              <Link to="/admin" className="w-10 h-10 rounded-xl bg-gray-800/50 flex items-center justify-center hover:bg-gray-800 transition-colors">
+                <LayoutDashboard className="w-5 h-5 text-gray-400" />
+              </Link>
+              <div>
+                <h1 className="text-lg font-semibold text-white">Broadcast</h1>
+                <p className="text-xs text-gray-400">Send emails to customers</p>
               </div>
             </div>
-          ))}
-          <div className="premium-card p-5 border-l-4 border-gold-500">
-            <h4 className="font-bold text-ink-800 mb-2">Email Service — Gmail SMTP</h4>
-            <div className="text-sm text-ink-600 space-y-2">
-              <p>Emails are sent via <strong>Gmail SMTP</strong> with an App Password.</p>
-              <p className="text-xs text-ink-400">Tip: Ask recipients to mark emails as "Not Spam" on first receive to ensure future delivery to inbox.</p>
-              <p className="text-xs text-ink-400">For better deliverability, consider verifying a domain at <a href="https://resend.com/domains" target="_blank" className="text-gold-600 underline">resend.com</a> later.</p>
+            <div className="flex items-center gap-4">
+              <Link to="/admin" className="text-gray-400 hover:text-white transition-colors">
+                <LayoutDashboard className="w-5 h-5" />
+              </Link>
+              <Link to="/admin/customers" className="text-gray-400 hover:text-white transition-colors">
+                <Users className="w-5 h-5" />
+              </Link>
+              <Link to="/admin/leads" className="text-gray-400 hover:text-white transition-colors">
+                <TrendingUp className="w-5 h-5" />
+              </Link>
+              <button onClick={() => { logout(); }} className="text-gray-400 hover:text-white transition-colors">
+                <Mail className="w-5 h-5" />
+              </button>
             </div>
           </div>
         </div>
-      )}
-    </DashboardShell>
-  )
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Compose Form */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="lg:col-span-2 bg-gray-900/50 backdrop-blur-xl border border-gray-800/50 rounded-2xl p-6"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-lg">
+                <Mail className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-white">Compose Email</h2>
+                <p className="text-xs text-gray-400">Send to {customers.length} customers</p>
+              </div>
+            </div>
+
+            {sent ? (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="w-8 h-8 text-emerald-400" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-2">Broadcast Sent!</h3>
+                <p className="text-gray-400">Email sent to {sentCount} customers</p>
+                <button 
+                  onClick={() => { setSent(false); setSubject(''); setMessage(''); }}
+                  className="mt-6 px-6 py-2.5 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-xl hover:bg-indigo-500/30 transition-colors"
+                >
+                  Send Another
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Subject</label>
+                  <input
+                    type="text"
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                    placeholder="Enter email subject..."
+                    className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Message</label>
+                  <textarea
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Enter your message... Use {{name}} for personalization"
+                    rows={10}
+                    className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all resize-none"
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-500">
+                    Recipients: {customers.length} customers
+                  </div>
+                  <button
+                    onClick={handleSendBroadcast}
+                    disabled={!subject || !message || sending}
+                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-medium hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg shadow-orange-500/25"
+                  >
+                    {sending ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-5 h-5" />
+                        Send Broadcast
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+          </motion.div>
+
+          {/* Templates */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-gray-900/50 backdrop-blur-xl border border-gray-800/50 rounded-2xl p-6"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+                <FileText className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-white">Templates</h2>
+                <p className="text-xs text-gray-400">Quick start templates</p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {templates.map((tpl, i) => (
+                <button
+                  key={i}
+                  onClick={() => applyTemplate(tpl)}
+                  className={`w-full text-left p-4 rounded-xl border transition-all duration-300 ${
+                    template === tpl.name
+                      ? 'bg-indigo-500/10 border-indigo-500/30'
+                      : 'bg-gray-800/30 border-gray-700/30 hover:border-gray-600/50'
+                  }`}
+                >
+                  <div className="font-medium text-white mb-1">{tpl.name}</div>
+                  <div className="text-sm text-gray-400 line-clamp-2">{tpl.subject}</div>
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-6 p-4 bg-gray-800/30 rounded-xl">
+              <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
+                <AlertCircle className="w-4 h-4" />
+                <span>Personalization</span>
+              </div>
+              <p className="text-xs text-gray-500">
+                Use {'{{name}}'} in your message to insert the customer's name automatically.
+              </p>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Recent Broadcasts */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mt-6 bg-gray-900/50 backdrop-blur-xl border border-gray-800/50 rounded-2xl p-6"
+        >
+          <h2 className="text-lg font-semibold text-white mb-4">Recent Broadcasts</h2>
+          <div className="space-y-3">
+            {[
+              { subject: 'Welcome to Stock Key', recipients: 45, date: '2 hours ago', status: 'sent' },
+              { subject: 'Portfolio Update - July', recipients: 38, date: '1 day ago', status: 'sent' },
+              { subject: 'Market Insights Weekly', recipients: 42, date: '3 days ago', status: 'sent' }
+            ].map((broadcast, i) => (
+              <div key={i} className="flex items-center justify-between p-4 bg-gray-800/30 rounded-xl">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                    <CheckCircle className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <div>
+                    <div className="font-medium text-white">{broadcast.subject}</div>
+                    <div className="text-sm text-gray-400">{broadcast.recipients} recipients • {broadcast.date}</div>
+                  </div>
+                </div>
+                <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-xs font-medium">
+                  Sent
+                </span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
 }
