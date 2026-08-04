@@ -92,7 +92,7 @@ export default function Login() {
           <p className="mt-3 text-gray-400">Track your portfolio, monthly returns and insurance — all in one place.</p>
         </div>
         <div className="relative z-10">
-          <span className="badge-sky text-xs">SEBI Registered &middot; NISM-Certified Experts</span>
+          <span className="badge-sky text-xs">NISM-Certified Experts</span>
         </div>
       </div>
 

@@ -3,6 +3,7 @@ import { investmentPlans } from '../../data/seed'
 import { inr } from '../../lib/utils'
 import { IconCheck } from '../../components/icons'
 import LeadForm from '../../components/LeadForm'
+import ReturnsCalculator from '../../components/ReturnsCalculator'
 
 export default function InvestmentPlans() {
   return (
@@ -90,6 +91,16 @@ export default function InvestmentPlans() {
             </table>
           </div>
         </div>
+      </section>
+
+      {/* Charts & Visualizations */}
+      <section className="bg-cream-50 section py-16">
+        <div className="text-center mb-10">
+          <span className="inline-flex items-center gap-2 badge-sky"><span className="w-1.5 h-1.5 rounded-full bg-sky-400" /> Returns Calculator</span>
+          <h2 className="mt-4 text-display-lg font-display text-ink-800">See Your Money Grow</h2>
+          <p className="mt-3 text-ink-500">Interactive charts showing investment growth, monthly payouts, and portfolio allocation</p>
+        </div>
+        <ReturnsCalculator planIndex={1} />
       </section>
 
       {/* Lead form */}

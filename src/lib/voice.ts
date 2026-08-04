@@ -5,32 +5,45 @@ function loadVoices(): Promise<SpeechSynthesisVoice[]> {
   return new Promise((resolve) => {
     const voices = window.speechSynthesis.getVoices()
     if (voices.length > 0) { resolve(voices); return }
-    window.speechSynthesis.onvoiceschanged = () => {
+
+    const onLoaded = () => {
       resolve(window.speechSynthesis.getVoices())
     }
+    window.speechSynthesis.addEventListener('voiceschanged', onLoaded)
+
+    // Timeout fallback: if voices never load, resolve with empty array
+    setTimeout(() => {
+      window.speechSynthesis.removeEventListener('voiceschanged', onLoaded)
+      resolve(window.speechSynthesis.getVoices())
+    }, 3000)
   })
 }
 
 function pickBestVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
-  // Priority order for natural-sounding English voices
+  // Priority order for natural-sounding human-like voices
   const preferred = [
-    // Google natural voices (best quality)
+    // Google natural voices (best quality, most human-like)
     'Google UK English Female',
     'Google UK English Male',
     'Google US English',
     'Google English (India)',
-    // Microsoft natural voices
+    'Google हिन्दी',
+    // Microsoft natural voices (Neural - very human-like)
     'Microsoft Zira',
     'Microsoft David',
     'Microsoft Mark',
-    // Apple voices
+    'Microsoft Ravi',
+    'Microsoft Heera',
+    // Apple natural voices (high quality)
     'Samantha',
     'Daniel',
     'Karen',
     'Moira',
+    'Tessa',
     // Fallback natural voices
     'Alex',
     'Victoria',
+    'Alice',
   ]
 
   // Try to find a preferred voice
@@ -74,8 +87,10 @@ export function speak(text: string, voice?: SpeechSynthesisVoice | null): Promis
       .replace(/\s+/g, ' ')
       .trim()
 
+    if (!cleanText) { resolve(); return }
+
     const utterance = new SpeechSynthesisUtterance(cleanText)
-    utterance.rate = 0.95 // Slightly slower for natural feel
+    utterance.rate = 0.92 // Slightly slower for natural, human-like feel
     utterance.pitch = 1.0
     utterance.volume = 1.0
 

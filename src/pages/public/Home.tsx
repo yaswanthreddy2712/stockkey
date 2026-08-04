@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { investmentPlans } from '../../data/seed'
 import { inr } from '../../lib/utils'
@@ -6,6 +7,8 @@ import {
   IconCheck, IconShield, IconTrend, IconChart, IconWallet,
   IconHeart, IconCar, IconBike, IconStar, IconArrow,
 } from '../../components/icons'
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
+import AssetDetailModal from '../../components/AssetDetailModal'
 
 declare global {
   interface Window {
@@ -28,7 +31,7 @@ const whyChoose = [
   { icon: IconTrend, title: 'Guaranteed Monthly Payouts', text: 'Consistent, predictable income every month — turn your capital into a lifelong passive income stream.' },
   { icon: IconChart, title: 'Transparent Reports', text: 'Regular performance reports showing total capital invested and returns earned. No hidden charges.' },
   { icon: IconWallet, title: 'Diversified Portfolio', text: 'Your capital is spread across Equities, Bonds, ETFs, IPOs and Options to balance risk and reward.' },
-  { icon: IconShield, title: 'SEBI Registered', text: 'Operate with confidence. We are a SEBI-registered firm led by NISM-certified experts.' },
+  { icon: IconShield, title: 'NISM Certified Experts', text: 'Operate with confidence. Our team is led by NISM-certified experts with deep market knowledge.' },
 ]
 
 const insuranceData = [
@@ -65,6 +68,7 @@ function Hero3DChart() {
 }
 
 export default function Home() {
+  const [selectedAsset, setSelectedAsset] = useState<string | null>(null)
   const hero = useReveal(0.1)
   const plans = useReveal(0.1)
   const why = useReveal(0.1)
@@ -89,7 +93,7 @@ export default function Home() {
           <div className="grid lg:grid-cols-12 gap-10 items-end">
             <div ref={hero.ref} className={`lg:col-span-7 ${hero.visible ? 'reveal-up visible' : 'reveal-up'}`}>
               <span className="inline-flex items-center gap-2 badge-sky text-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-sky-400" /> SEBI Registered &middot; NISM-Certified
+                <span className="w-1.5 h-1.5 rounded-full bg-sky-400" /> NISM-Certified Experts
               </span>
               <h1 className="mt-6 text-5xl sm:text-6xl lg:text-7xl font-display font-bold text-gray-50 leading-[0.98] tracking-tight">
                 Invest Smart.<br />
@@ -117,7 +121,7 @@ export default function Home() {
 
         <div className="relative z-20 border-t py-4 px-5 sm:px-8 text-[0.75rem] font-medium uppercase tracking-[0.025em] flex justify-between max-w-[88rem] mx-auto w-full" style={{ borderColor: 'var(--border-dark)', color: 'var(--text-muted)' }}>
           <span>Stock Key Investments</span>
-          <span className="hidden sm:inline">SEBI Registered &middot; NISM Certified</span>
+          <span className="hidden sm:inline">NISM Certified &middot; Trusted by 500+ Investors</span>
           <span>Since 2020</span>
         </div>
       </section>
@@ -144,9 +148,13 @@ export default function Home() {
             { label: 'ETFs', bg: 'bg-gradient-to-br from-gray-700 to-gray-900 text-white' },
             { label: 'IPOs', bg: 'bg-gradient-to-br from-emerald-100 to-emerald-400 text-emerald-900' },
           ].map((item) => (
-            <div key={item.label} className={`card-3d flex flex-col items-center justify-center gap-1 h-[4.5rem] md:h-[5.25rem] rounded-full ${item.bg} font-semibold text-sm md:text-base shadow-[0_8px_18px_rgba(0,0,0,0.1)]`}>
+            <button
+              key={item.label}
+              onClick={() => setSelectedAsset(item.label)}
+              className={`card-3d flex flex-col items-center justify-center gap-1 h-[4.5rem] md:h-[5.25rem] rounded-full ${item.bg} font-semibold text-sm md:text-base shadow-[0_8px_18px_rgba(0,0,0,0.1)] transition-transform hover:scale-105 active:scale-95 cursor-pointer`}
+            >
               {item.label}
-            </div>
+            </button>
           ))}
         </div>
       </section>
@@ -280,6 +288,82 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ═══ RETURNS GROWTH CHART ═══ */}
+      <section className="py-20" style={{ background: 'var(--bg-dark)' }}>
+        <div className="section">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <span className="inline-flex items-center gap-2 badge-sky"><span className="w-1.5 h-1.5 rounded-full bg-sky-400" /> Returns Calculator</span>
+            <h2 className="mt-4 text-display-lg font-display text-gray-50">Watch Your Money Grow</h2>
+            <p className="mt-3 text-gray-400">See how a ₹5 Lakh investment grows with 12% monthly returns over 12 months</p>
+          </div>
+          <div className="max-w-4xl mx-auto">
+            <div className="rounded-2xl border border-gray-700/50 bg-gray-800/30 p-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="text-center">
+                  <p className="text-xs text-gray-500 uppercase">Invested</p>
+                  <p className="text-xl font-bold text-gray-100 tabular">₹5.0L</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-gray-500 uppercase">Monthly</p>
+                  <p className="text-xl font-bold text-emerald-400 tabular">₹60K</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-gray-500 uppercase">Total Returns</p>
+                  <p className="text-xl font-bold text-sky-400 tabular">₹7.2L</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-gray-500 uppercase">ROI</p>
+                  <p className="text-xl font-bold text-amber-400 tabular">144%</p>
+                </div>
+              </div>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={[
+                    { month: 'Start', value: 500000, returns: 0 },
+                    { month: 'M1', value: 560000, returns: 60000 },
+                    { month: 'M2', value: 620000, returns: 120000 },
+                    { month: 'M3', value: 680000, returns: 180000 },
+                    { month: 'M4', value: 740000, returns: 240000 },
+                    { month: 'M5', value: 800000, returns: 300000 },
+                    { month: 'M6', value: 860000, returns: 360000 },
+                    { month: 'M7', value: 920000, returns: 420000 },
+                    { month: 'M8', value: 980000, returns: 480000 },
+                    { month: 'M9', value: 1040000, returns: 540000 },
+                    { month: 'M10', value: 1100000, returns: 600000 },
+                    { month: 'M11', value: 1160000, returns: 660000 },
+                    { month: 'M12', value: 1220000, returns: 720000 },
+                  ]}>
+                    <defs>
+                      <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="colorRet" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                    <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#9ca3af' }} />
+                    <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} tickFormatter={(v) => `₹${(v/100000).toFixed(0)}L`} />
+                    <Tooltip
+                      contentStyle={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '12px' }}
+                      labelStyle={{ color: '#9ca3af' }}
+                      formatter={(v: number) => [`₹${(v/100000).toFixed(2)}L`, '']}
+                    />
+                    <Area type="monotone" dataKey="value" name="Portfolio Value" stroke="#0ea5e9" fill="url(#colorVal)" strokeWidth={2.5} />
+                    <Area type="monotone" dataKey="returns" name="Returns Earned" stroke="#10b981" fill="url(#colorRet)" strokeWidth={2} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="mt-4 text-center">
+                <Link to="/plans" className="btn-gold btn-3d text-sm px-6 py-2.5">View All Plans &rarr;</Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ═══ TESTIMONIAL ═══ */}
       <section className="py-16 border-y" style={{ background: 'var(--bg-dark)', borderColor: 'var(--border-dark-subtle)' }}>
         <div className="section grid gap-10 md:grid-cols-2 items-center">
@@ -314,12 +398,14 @@ export default function Home() {
             <Link to="/contact" className="btn-outline text-base px-7 py-3.5">Talk to an Advisor</Link>
           </div>
           <div className="mt-10 flex justify-center flex-wrap gap-3">
-            {['SEBI Registered', 'NISM Certified', '500+ Investors'].map((t) => (
+            {['NISM Certified', '500+ Investors', 'Transparent Reports'].map((t) => (
               <span key={t} className="badge-gold">{t}</span>
             ))}
           </div>
         </div>
       </section>
+
+      {selectedAsset && <AssetDetailModal asset={selectedAsset} onClose={() => setSelectedAsset(null)} />}
     </div>
   )
 }

@@ -1,179 +1,106 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { getBotResponse, getWelcomeMessage, generateId, personalities, type ChatMessage, type AIPersonality } from '../lib/faqBot'
-import { initVoice, speak, stopSpeaking, isSpeaking } from '../lib/voice'
+import { useAgent, LANGUAGES } from '../lib/useAgent'
 import { IconChart } from './icons'
 
+/**
+ * Voice-enabled floating chat widget (replaces the old rule-based ChatWidget).
+ * - Conversational LLM brain via /api/agent (Sarvam Chat)
+ * - Natural TTS via /api/voice (Sarvam Bulbul v3) with browser fallback
+ * - Multilingual: pick language for both STT and TTS
+ * - Floating bubble + popup panel + full-screen overlay + link to /ai page
+ */
 export default function ChatWidget() {
   const [open, setOpen] = useState(false)
   const [fullScreen, setFullScreen] = useState(false)
-  const [activePersonality, setActivePersonality] = useState<AIPersonality>(personalities[0])
-  const [showPersonalityPicker, setShowPersonalityPicker] = useState(false)
-  const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [input, setInput] = useState('')
-  const [typing, setTyping] = useState(false)
-  const [listening, setListening] = useState(false)
-  const [voiceEnabled, setVoiceEnabled] = useState(true)
-  const [speakingMsgId, setSpeakingMsgId] = useState<string | null>(null)
+  const [showLangPicker, setShowLangPicker] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const recognitionRef = useRef<any>(null)
-  const voiceRef = useRef<SpeechSynthesisVoice | null>(null)
 
-  // Init voice on mount
-  useEffect(() => {
-    initVoice().then(v => { voiceRef.current = v })
-    window.__openChat = () => { setOpen(true); setFullScreen(true) }
-    return () => { delete window.__openChat; stopSpeaking() }
-  }, [])
+  const agent = useAgent({ voiceEnabled: true })
 
-  // Initialize with personality greeting
+  // Init greeting on mount + expose global opener
   useEffect(() => {
-    if (messages.length === 0) {
-      const greeting = { id: generateId(), role: 'assistant' as const, text: activePersonality.greeting, timestamp: Date.now(), personality: activePersonality.id }
-      setMessages([greeting])
-      // Speak greeting
-      if (voiceEnabled) {
-        setTimeout(() => {
-          speak(activePersonality.greeting, voiceRef.current).then(() => setSpeakingMsgId(null))
-          setSpeakingMsgId(greeting.id)
-        }, 500)
-      }
-    }
+    agent.initGreeting()
+    ;(window as any).__openChat = () => { setOpen(true); setFullScreen(true) }
+    return () => { delete (window as any).__openChat; agent.stopSpeaking() }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, typing])
+  }, [agent.messages, agent.typing])
 
   useEffect(() => {
     if (open) setTimeout(() => inputRef.current?.focus(), 150)
   }, [open, fullScreen])
 
-  const switchPersonality = (p: AIPersonality) => {
-    setActivePersonality(p)
-    setShowPersonalityPicker(false)
-    stopSpeaking()
-    const greeting = { id: generateId(), role: 'assistant' as const, text: p.greeting, timestamp: Date.now(), personality: p.id }
-    setMessages([greeting])
-    if (voiceEnabled) {
-      setTimeout(() => {
-        speak(p.greeting, voiceRef.current).then(() => setSpeakingMsgId(null))
-        setSpeakingMsgId(greeting.id)
-      }, 300)
-    }
-  }
-
-  const toggleVoice = () => {
-    if (voiceEnabled) stopSpeaking()
-    setVoiceEnabled(!voiceEnabled)
-  }
-
-  const stopAllSpeech = () => {
-    stopSpeaking()
-    setSpeakingMsgId(null)
-  }
-
-  const send = useCallback((text?: string) => {
-    const msg = (text || input).trim()
-    if (!msg) return
-
-    stopSpeaking()
-    setSpeakingMsgId(null)
-
-    const userMsg: ChatMessage = { id: generateId(), role: 'user', text: msg, timestamp: Date.now() }
-    setMessages((m) => [...m, userMsg])
-    setInput('')
-    setTyping(true)
-
-    setTimeout(() => {
-      const reply = getBotResponse(msg)
-      const replyMsg = { id: generateId(), role: 'assistant' as const, text: reply, timestamp: Date.now(), personality: activePersonality.id }
-      setMessages((m) => [...m, replyMsg])
-      setTyping(false)
-
-      // Speak the reply
-      if (voiceEnabled) {
-        setTimeout(() => {
-          speak(reply, voiceRef.current).then(() => setSpeakingMsgId(null))
-          setSpeakingMsgId(replyMsg.id)
-        }, 200)
-      }
-    }, 600 + Math.random() * 800)
-  }, [input, activePersonality, voiceEnabled])
-
   const handleKey = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() }
   }
 
-  // Voice input
-  const startListening = () => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      alert('Voice input is not supported in your browser. Try Chrome.')
-      return
-    }
-    stopSpeaking()
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    const recognition = new SpeechRecognition()
-    recognitionRef.current = recognition
-    recognition.continuous = false
-    recognition.interimResults = true
-    recognition.lang = 'en-US'
-    recognition.onresult = (event: any) => {
-      const transcript = Array.from(event.results).map((r: any) => r[0].transcript).join('')
-      setInput(transcript)
-    }
-    recognition.onend = () => setListening(false)
-    recognition.onerror = () => setListening(false)
-    recognition.start()
-    setListening(true)
+  function handleSend(text?: string) {
+    const msg = (text ?? inputVal).trim()
+    if (!msg) return
+    setInputVal('')
+    agent.send(msg)
   }
 
-  const stopListening = () => {
-    recognitionRef.current?.stop()
-    setListening(false)
-  }
-
+  const [inputVal, setInputVal] = useState('')
   const quickActions = ['Investment Plans', 'Monthly Returns', 'How to Register', 'Insurance']
+
+  const statusText = agent.listening
+    ? 'Listening…'
+    : agent.typing
+    ? 'Thinking…'
+    : agent.speakingMsgId
+    ? 'Speaking…'
+    : 'Online'
 
   const chatContent = (
     <div className="flex flex-col h-full" style={{ background: fullScreen ? 'var(--bg-dark)' : undefined }}>
       {/* Header */}
       <div className="px-4 py-3 flex items-center gap-3 flex-shrink-0" style={{ background: 'var(--surface-dark)', borderBottom: '1px solid var(--border-dark)' }}>
-        {showPersonalityPicker ? (
-          <button onClick={() => setShowPersonalityPicker(false)} className="text-gray-400 hover:text-white transition-colors">
+        {showLangPicker ? (
+          <button onClick={() => setShowLangPicker(false)} className="text-gray-400 hover:text-white transition-colors">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
           </button>
         ) : (
-          <span className={`h-9 w-9 rounded-xl flex items-center justify-center text-lg bg-gradient-to-br ${activePersonality.color} flex-shrink-0 shadow-lg`}>{activePersonality.avatar}</span>
+          <span className="h-9 w-9 rounded-xl flex items-center justify-center bg-sky-gradient flex-shrink-0 shadow-lg">
+            <IconChart className="h-5 w-5 text-white" />
+          </span>
         )}
         <div className="flex-1 min-w-0">
-          {showPersonalityPicker ? (
-            <h3 className="text-sm font-bold text-gray-50 font-display">Choose AI Assistant</h3>
+          {showLangPicker ? (
+            <h3 className="text-sm font-bold text-gray-50 font-display">Choose Language</h3>
           ) : (
             <>
-              <h3 className="text-sm font-bold text-gray-50 font-display">{activePersonality.name} — {activePersonality.role}</h3>
-              <p className="text-xs text-gray-400">{typing ? 'Thinking...' : speakingMsgId ? 'Speaking...' : 'Online'}</p>
+              <h3 className="text-sm font-bold text-gray-50 font-display">Stock Key Voice Assistant</h3>
+              <p className="text-xs text-gray-400">{statusText}</p>
             </>
           )}
         </div>
-        {!showPersonalityPicker && (
+        {!showLangPicker && (
           <div className="flex items-center gap-1">
-            <button onClick={toggleVoice} className={`p-2 rounded-lg transition-all ${voiceEnabled ? 'text-sky-400 bg-sky-400/10' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-700/50'}`} title={voiceEnabled ? 'Voice ON' : 'Voice OFF'}>
-              {voiceEnabled ? (
+            {/* Language picker */}
+            <button onClick={() => setShowLangPicker(true)} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-all" title="Change language">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m3.1 9.5L12 21m-4.5-4.5h9M17 11a5 5 0 11-10 0 5 5 0 0110 0z" /></svg>
+            </button>
+            {/* Voice toggle */}
+            <button onClick={agent.setVoiceEnabled} className={`p-2 rounded-lg transition-all ${agent.voiceEnabled ? 'text-sky-400 bg-sky-400/10' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-700/50'}`} title={agent.voiceEnabled ? 'Voice ON' : 'Voice OFF'}>
+              {agent.voiceEnabled ? (
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
               ) : (
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /><path strokeLinecap="round" strokeLinejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" /></svg>
               )}
             </button>
-            {speakingMsgId && (
-              <button onClick={stopAllSpeech} className="p-2 text-red-400 hover:bg-gray-700/50 rounded-lg transition-all" title="Stop speaking">
+            {/* Stop speaking */}
+            {agent.speakingMsgId && (
+              <button onClick={agent.stopSpeaking} className="p-2 text-red-400 hover:bg-gray-700/50 rounded-lg transition-all" title="Stop speaking">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" /></svg>
               </button>
             )}
-            <button onClick={() => setShowPersonalityPicker(true)} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-all" title="Change assistant">
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-            </button>
+            {/* Full screen */}
             {!fullScreen && (
               <button onClick={() => { setFullScreen(true); setOpen(false) }} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-all" title="Full screen">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
@@ -187,28 +114,24 @@ export default function ChatWidget() {
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" /></svg>
               </button>
             )}
-            <button onClick={() => { stopSpeaking(); setOpen(false); setFullScreen(false) }} className="p-2 text-gray-400 hover:text-red-400 hover:bg-gray-700/50 rounded-lg transition-all" title="Close">
+            <button onClick={() => { agent.stopSpeaking(); setOpen(false); setFullScreen(false) }} className="p-2 text-gray-400 hover:text-red-400 hover:bg-gray-700/50 rounded-lg transition-all" title="Close">
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
         )}
       </div>
 
-      {/* Personality Picker */}
-      {showPersonalityPicker ? (
+      {/* Language Picker */}
+      {showLangPicker ? (
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
-          {personalities.map((p) => (
-            <button key={p.id} onClick={() => switchPersonality(p)}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${activePersonality.id === p.id ? 'border-sky-500/50 bg-sky-500/10' : 'border-gray-700/50 bg-gray-800/30 hover:bg-gray-700/40'}`}>
-              <span className={`h-12 w-12 rounded-xl flex items-center justify-center text-2xl bg-gradient-to-br ${p.color} flex-shrink-0`}>{p.avatar}</span>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-100">{p.name}</p>
-                <p className="text-xs text-gray-400">{p.role}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{p.style === 'professional' ? 'Formal & data-driven' : p.style === 'friendly' ? 'Warm & conversational' : p.style === 'expert' ? 'Deep market knowledge' : 'Caring & supportive'}</p>
+          {LANGUAGES.map((l) => (
+            <button key={l.code} onClick={() => { agent.setLanguage(l.code); setShowLangPicker(false) }}
+              className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all text-left ${agent.language === l.code ? 'border-sky-500/50 bg-sky-500/10' : 'border-gray-700/50 bg-gray-800/30 hover:bg-gray-700/40'}`}>
+              <div>
+                <p className="font-semibold text-gray-100">{l.label}</p>
+                <p className="text-xs text-gray-400">{l.nativeLabel}</p>
               </div>
-              {activePersonality.id === p.id && (
-                <svg className="h-5 w-5 text-sky-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-              )}
+              <span className="text-xs text-gray-500">{l.code}</span>
             </button>
           ))}
         </div>
@@ -216,34 +139,30 @@ export default function ChatWidget() {
         <>
           {/* Messages */}
           <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-            {messages.map((m) => (
+            {agent.messages.map((m) => (
               <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 {m.role === 'assistant' && (
-                  <span className={`h-7 w-7 rounded-lg flex items-center justify-center text-sm bg-gradient-to-br ${activePersonality.color} flex-shrink-0 mr-2 mt-0.5`}>{activePersonality.avatar}</span>
+                  <span className="h-7 w-7 rounded-lg flex items-center justify-center bg-sky-gradient flex-shrink-0 mr-2 mt-0.5">
+                    <IconChart className="h-4 w-4 text-white" />
+                  </span>
                 )}
-                <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                  m.role === 'user'
-                    ? 'bg-sky-500/20 text-gray-100 rounded-br-md'
-                    : 'rounded-bl-md text-gray-200'
-                }`} style={m.role === 'assistant' ? { background: 'var(--card-dark)' } : undefined}>
-                  <p className="whitespace-pre-wrap">{m.text.split('**').map((part, i) =>
-                    i % 2 === 1 ? <strong key={i} className="text-gray-50 font-semibold">{part}</strong> : part
-                  )}</p>
-                  {m.role === 'assistant' && speakingMsgId === m.id && (
+                <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${m.role === 'user' ? 'bg-sky-500/20 text-gray-100 rounded-br-md' : 'rounded-bl-md text-gray-200'}`} style={m.role === 'assistant' ? { background: 'var(--card-dark)' } : undefined}>
+                  <p className="whitespace-pre-wrap">{m.text.split('**').map((part, i) => i % 2 === 1 ? <strong key={i} className="text-gray-50 font-semibold">{part}</strong> : part)}</p>
+                  {m.role === 'assistant' && agent.speakingMsgId === m.id && (
                     <div className="flex items-center gap-1 mt-1.5">
-                      <span className="w-1 h-1 rounded-full bg-sky-400 animate-pulse" />
-                      <span className="w-1 h-1.5 rounded-full bg-sky-400 animate-pulse" style={{ animationDelay: '0.15s' }} />
-                      <span className="w-1 h-2 rounded-full bg-sky-400 animate-pulse" style={{ animationDelay: '0.3s' }} />
-                      <span className="w-1 h-1.5 rounded-full bg-sky-400 animate-pulse" style={{ animationDelay: '0.45s' }} />
-                      <span className="w-1 h-1 rounded-full bg-sky-400 animate-pulse" style={{ animationDelay: '0.6s' }} />
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <span key={i} className="w-1 rounded-full bg-sky-400 animate-pulse" style={{ height: `${8 + (i % 3) * 4}px`, animationDelay: `${i * 0.12}s` }} />
+                      ))}
                     </div>
                   )}
                 </div>
               </div>
             ))}
-            {typing && (
+            {agent.typing && (
               <div className="flex justify-start">
-                <span className={`h-7 w-7 rounded-lg flex items-center justify-center text-sm bg-gradient-to-br ${activePersonality.color} flex-shrink-0 mr-2`}>{activePersonality.avatar}</span>
+                <span className="h-7 w-7 rounded-lg flex items-center justify-center bg-sky-gradient flex-shrink-0 mr-2">
+                  <IconChart className="h-4 w-4 text-white" />
+                </span>
                 <div className="rounded-2xl rounded-bl-md px-4 py-3" style={{ background: 'var(--card-dark)' }}>
                   <div className="flex gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-gray-500 animate-bounce" style={{ animationDelay: '0ms' }} />
@@ -256,12 +175,15 @@ export default function ChatWidget() {
             <div ref={bottomRef} />
           </div>
 
+          {agent.error && (
+            <div className="px-4 pb-2 text-xs text-red-400">{agent.error}</div>
+          )}
+
           {/* Quick Actions */}
-          {messages.length <= 2 && (
+          {agent.messages.length <= 2 && (
             <div className="px-4 pb-2 flex flex-wrap gap-1.5">
               {quickActions.map((qa) => (
-                <button key={qa} onClick={() => { setInput(qa); setTimeout(send, 50) }}
-                  className="text-xs px-3 py-1.5 rounded-full border border-gray-700/50 bg-gray-800/40 text-gray-300 hover:bg-gray-700/40 hover:text-gray-100 transition-colors">
+                <button key={qa} onClick={() => agent.send(qa)} className="text-xs px-3 py-1.5 rounded-full border border-gray-700/50 bg-gray-800/40 text-gray-300 hover:bg-gray-700/40 hover:text-gray-100 transition-colors">
                   {qa}
                 </button>
               ))}
@@ -273,24 +195,27 @@ export default function ChatWidget() {
             <div className="flex gap-2 items-center rounded-xl border px-3 py-2" style={{ borderColor: 'var(--border-dark)', background: 'var(--card-dark)' }}>
               <input
                 ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
+                value={inputVal}
+                onChange={(e) => setInputVal(e.target.value)}
                 onKeyDown={handleKey}
-                placeholder={listening ? 'Listening...' : 'Type or speak...'}
+                placeholder={agent.listening ? 'Listening…' : 'Type or speak…'}
                 className="flex-1 bg-transparent text-sm text-gray-100 placeholder:text-gray-500 outline-none"
-                disabled={listening}
+                disabled={agent.listening}
               />
               <button
-                onMouseDown={listening ? stopListening : startListening}
-                className={`h-8 w-8 rounded-lg flex items-center justify-center transition-all flex-shrink-0 ${listening ? 'bg-red-500 animate-pulse text-white' : 'bg-gray-700/50 text-gray-400 hover:text-white hover:bg-gray-600/50'}`}
-                title={listening ? 'Stop listening' : 'Speak now'}
+                onMouseDown={agent.listening ? agent.stopListening : agent.startListening}
+                className={`h-8 w-8 rounded-lg flex items-center justify-center transition-all flex-shrink-0 ${agent.listening ? 'bg-red-500 animate-pulse text-white' : 'bg-gray-700/50 text-gray-400 hover:text-white hover:bg-gray-600/50'}`}
+                title={agent.listening ? 'Stop listening' : 'Speak now'}
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
               </button>
-              <button onClick={() => send()} disabled={!input.trim()} className="h-8 w-8 rounded-lg bg-sky-gradient flex items-center justify-center text-white disabled:opacity-40 transition-opacity flex-shrink-0">
+              <button onClick={() => handleSend()} disabled={!inputVal.trim() || agent.typing} className="h-8 w-8 rounded-lg bg-sky-gradient flex items-center justify-center text-white disabled:opacity-40 transition-opacity flex-shrink-0">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
               </button>
             </div>
+            <p className="text-center text-[10px] text-gray-600 mt-1.5">
+              {agent.listening ? <span className="text-red-400">Listening… speak now</span> : agent.speakingMsgId ? <span className="text-sky-400">AI is speaking… tap stop to interrupt</span> : `Voice agent · ${LANGUAGES.find((l) => l.code === agent.language)?.label || 'English'}`}
+            </p>
           </div>
         </>
       )}
@@ -299,7 +224,7 @@ export default function ChatWidget() {
 
   return (
     <>
-      {/* ── Floating Bubble ── */}
+      {/* Floating Bubble */}
       {!fullScreen && (
         <button
           onClick={() => setOpen(!open)}
@@ -314,14 +239,14 @@ export default function ChatWidget() {
         </button>
       )}
 
-      {/* ── Floating Panel ── */}
+      {/* Floating Panel */}
       {open && !fullScreen && (
         <div className="fixed bottom-24 right-6 z-50 w-[360px] max-w-[calc(100vw-3rem)] rounded-2xl overflow-hidden shadow-2xl flex flex-col animate-fade-up" style={{ height: 'min(560px, calc(100vh - 8rem))', background: 'var(--bg-dark)', border: '1px solid var(--border-dark)' }}>
           {chatContent}
         </div>
       )}
 
-      {/* ── Full Screen Overlay ── */}
+      {/* Full Screen Overlay */}
       {fullScreen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center animate-fade-in" style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)' }}>
           <div className="w-full max-w-2xl h-[90vh] rounded-2xl overflow-hidden shadow-2xl flex flex-col animate-fade-up" style={{ background: 'var(--bg-dark)', border: '1px solid var(--border-dark)' }}>

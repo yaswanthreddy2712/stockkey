@@ -121,7 +121,7 @@ export default function Register() {
           </ul>
         </div>
         <div className="relative z-10">
-          <span className="badge-sky text-xs">SEBI Registered &middot; NISM-Certified Experts</span>
+          <span className="badge-sky text-xs">NISM-Certified Experts</span>
         </div>
       </div>
 

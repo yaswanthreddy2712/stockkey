@@ -17,7 +17,7 @@ export default function Footer() {
             <span className="font-bold text-gray-100 font-display text-lg">Stock Key Investments</span>
           </div>
           <p className="text-sm text-gray-400 leading-relaxed max-w-xs">
-            The key to your financial freedom. SEBI-registered early-retirement investment platform led by NISM-certified experts.
+            The key to your financial freedom. Early-retirement investment platform led by NISM-certified experts.
           </p>
           <div className="mt-5 flex gap-2">
             {['X', 'FB', 'IG'].map((s) => (
@@ -70,7 +70,7 @@ export default function Footer() {
       {/* Bottom */}
       <div className="relative z-10 border-t border-gray-800/50">
         <div className="section py-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-500">
-          <p>&copy; {new Date().getFullYear()} Stock Key Investments. SEBI Registered. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Stock Key Investments. All rights reserved.</p>
           <p>Investments in securities market are subject to market risks. Read all documents carefully.</p>
         </div>
       </div>

@@ -27,12 +27,12 @@ export default function About() {
           </p>
           <p className="mt-4 text-ink-600 leading-relaxed">
             Today we manage over ₹50 Crore in assets for 500+ happy investors, with a 99% payout success rate.
-            As a SEBI-registered firm led by NISM-certified experts, your capital is always in safe, transparent hands.
+            As a firm led by NISM-certified experts, your capital is always in safe, transparent hands.
           </p>
         </div>
         <div className="grid grid-cols-2 gap-4">
           {[
-            { label: 'SEBI Registered', value: 'Yes', icon: IconShield },
+            { label: 'Compliance', value: 'Fully Regulated', icon: IconShield },
             { label: 'Experts', value: 'NISM Certified', icon: IconTrend },
             { label: 'Assets Managed', value: '₹50 Cr+', icon: IconChart },
             { label: 'Investors', value: '500+', icon: IconCheck },

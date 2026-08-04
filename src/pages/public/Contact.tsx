@@ -42,7 +42,7 @@ export default function Contact() {
               <p className="text-sm text-ink-500">Office hours</p>
               <p className="font-semibold text-ink-800">Mon &ndash; Sat, 9:30 AM &ndash; 7:00 PM IST</p>
               <div className="mt-4 flex flex-wrap gap-2">
-                {['SEBI Registered', 'NISM Certified Advisors', '500+ Happy Investors'].map((t) => (
+                {['NISM Certified Advisors', '500+ Happy Investors', 'Transparent Process'].map((t) => (
                   <span key={t} className="badge-gold">
                     <IconCheck className="h-3 w-3" /> {t}
                   </span>

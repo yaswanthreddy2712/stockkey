@@ -31,7 +31,7 @@ export default function Invoice({ customer }: Props) {
           <div>
             <h1 className="text-2xl font-bold text-ink-900 font-display tracking-tight">TAX INVOICE</h1>
             <p className="text-xs text-ink-400 mt-1">Stock Key Investments</p>
-            <p className="text-xs text-ink-400">SEBI Registered · NISM-Certified Experts</p>
+            <p className="text-xs text-ink-400">NISM-Certified Experts</p>
           </div>
           <div className="text-right">
             <div className="inline-block bg-ink-900 text-white px-4 py-2 rounded-lg">
@@ -58,7 +58,7 @@ export default function Invoice({ customer }: Props) {
           <div className="text-right">
             <p className="text-[10px] uppercase tracking-widest text-ink-400 mb-2 font-semibold">From</p>
             <p className="font-bold text-ink-900">Stock Key Investments</p>
-            <p className="text-sm text-ink-600">SEBI Registered Investment Advisor</p>
+            <p className="text-sm text-ink-600">Investment Advisor</p>
             <p className="text-sm text-ink-600">NISM-Certified Experts</p>
             <p className="text-sm text-ink-600">Tel: +91 70131 78382</p>
           </div>
@@ -148,7 +148,7 @@ export default function Invoice({ customer }: Props) {
           <p>1. This invoice is generated at the time of investment registration.</p>
           <p>2. Monthly payouts of {inr(customer.monthlyPayout)} will be credited for 12 consecutive months.</p>
           <p>3. Total returns of {inr(customer.monthlyPayout * 12, true)} represent the full payout over the tenure period.</p>
-          <p>4. Investment is managed by SEBI-registered, NISM-certified advisors.</p>
+          <p>4. Investment is managed by NISM-certified advisors.</p>
           <p>5. For queries, contact support at +91 70131 78382 or visit stock-sigma-seven.vercel.app</p>
         </div>
 
@@ -167,7 +167,7 @@ export default function Invoice({ customer }: Props) {
         </div>
 
         <p className="text-center text-[10px] text-ink-300 mt-6">
-          This is a computer-generated invoice. · SEBI Registered · NISM-Certified Experts
+          This is a computer-generated invoice. · NISM-Certified Experts
         </p>
       </div>
     </>

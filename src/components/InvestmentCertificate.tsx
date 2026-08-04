@@ -144,7 +144,7 @@ export default function InvestmentCertificate({ customer }: Props) {
           <p className="mt-3">
             The investor is entitled to a monthly payout
             of <strong className="text-amber-700">{inr(customer.monthlyPayout)}/month</strong> for the
-            duration of the investment tenure. The investment is managed by SEBI-registered,
+            duration of the investment tenure. The investment is managed by
             NISM-certified advisors.
           </p>
         </div>
@@ -166,7 +166,7 @@ export default function InvestmentCertificate({ customer }: Props) {
         {/* Footer */}
         <p className="text-center text-[10px] text-ink-300 mt-6">
           This certificate is computer-generated and valid without a physical signature.
-          &middot; SEBI Registered &middot; NISM-Certified Experts
+          &middot; NISM-Certified Experts
         </p>
       </div>
     </>

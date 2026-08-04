@@ -193,7 +193,7 @@ app.post('/api/auth/send-otp', async (req, res) => {
             <p style="color:#9ca3af;font-size:12px;">If you didn't request this, please ignore this email.</p>
           </div>
           <div style="background:#f8f9fa;padding:16px;text-align:center;border-top:1px solid #e5e7eb;">
-            <p style="color:#9ca3af;font-size:11px;margin:0;">Stock Key Investments · SEBI Registered</p>
+            <p style="color:#9ca3af;font-size:11px;margin:0;">Stock Key Investments · NISM Certified</p>
           </div>
         </div>
       `,
@@ -234,7 +234,7 @@ app.post('/api/auth/send-register-otp', async (req, res) => {
             <p style="color:#9ca3af;font-size:12px;">If you didn't request this, please ignore this email.</p>
           </div>
           <div style="background:#f8f9fa;padding:16px;text-align:center;border-top:1px solid #e5e7eb;">
-            <p style="color:#9ca3af;font-size:11px;margin:0;">Stock Key Investments · SEBI Registered</p>
+            <p style="color:#9ca3af;font-size:11px;margin:0;">Stock Key Investments · NISM Certified</p>
           </div>
         </div>
       `,
@@ -413,7 +413,7 @@ const emailTemplates = {
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;">
         <div style="background:linear-gradient(135deg,#1a1f2e 0%,#0d1117 100%);padding:32px;text-align:center;">
           <h1 style="color:#D4AF37;margin:0;font-size:24px;">Stock Key Investments</h1>
-          <p style="color:#9ca3af;margin:8px 0 0;">SEBI Registered · NISM-Certified Experts</p>
+          <p style="color:#9ca3af;margin:8px 0 0;">NISM-Certified Experts</p>
         </div>
         <div style="padding:32px;">
           <h2 style="color:#1a1f2e;margin:0 0 16px;">Welcome, ${name}!</h2>
@@ -428,7 +428,7 @@ const emailTemplates = {
           </div>
         </div>
         <div style="background:#f8f9fa;padding:20px;text-align:center;border-top:1px solid #e5e7eb;">
-          <p style="color:#9ca3af;font-size:12px;margin:0;">Stock Key Investments · SEBI Registered · NISM-Certified Experts</p>
+          <p style="color:#9ca3af;font-size:12px;margin:0;">Stock Key Investments · NISM-Certified Experts</p>
           <p style="color:#9ca3af;font-size:12px;margin:4px 0 0;">Need help? Call <a href="tel:+917013178382" style="color:#D4AF37;">+91 70131 78382</a></p>
         </div>
       </div>
@@ -453,7 +453,7 @@ const emailTemplates = {
           </div>
         </div>
         <div style="background:#f8f9fa;padding:20px;text-align:center;border-top:1px solid #e5e7eb;">
-          <p style="color:#9ca3af;font-size:12px;margin:0;">Stock Key Investments · SEBI Registered · NISM-Certified Experts</p>
+          <p style="color:#9ca3af;font-size:12px;margin:0;">Stock Key Investments · NISM-Certified Experts</p>
         </div>
       </div>
     `,
@@ -474,7 +474,7 @@ const emailTemplates = {
           </div>
         </div>
         <div style="background:#f8f9fa;padding:20px;text-align:center;border-top:1px solid #e5e7eb;">
-          <p style="color:#9ca3af;font-size:12px;margin:0;">Stock Key Investments · SEBI Registered · NISM-Certified Experts</p>
+          <p style="color:#9ca3af;font-size:12px;margin:0;">Stock Key Investments · NISM-Certified Experts</p>
         </div>
       </div>
     `,
@@ -499,7 +499,7 @@ const emailTemplates = {
           </div>
         </div>
         <div style="background:#f8f9fa;padding:20px;text-align:center;border-top:1px solid #e5e7eb;">
-          <p style="color:#9ca3af;font-size:12px;margin:0;">Stock Key Investments · SEBI Registered · NISM-Certified Experts</p>
+          <p style="color:#9ca3af;font-size:12px;margin:0;">Stock Key Investments · NISM-Certified Experts</p>
         </div>
       </div>
     `,
@@ -517,7 +517,7 @@ const emailTemplates = {
           <div style="color:#475569;line-height:1.8;white-space:pre-wrap;">${body}</div>
         </div>
         <div style="background:#f8f9fa;padding:20px;text-align:center;border-top:1px solid #e5e7eb;">
-          <p style="color:#9ca3af;font-size:12px;margin:0;">Stock Key Investments · SEBI Registered · NISM-Certified Experts</p>
+          <p style="color:#9ca3af;font-size:12px;margin:0;">Stock Key Investments · NISM-Certified Experts</p>
           <p style="color:#9ca3af;font-size:12px;margin:4px 0 0;">Call <a href="tel:+917013178382" style="color:#D4AF37;">+91 70131 78382</a></p>
         </div>
       </div>
@@ -607,7 +607,7 @@ async function sendLoginNotification(userName, userEmail, role, req) {
             </table>
           </div>
           <div style="background:#f8f9fa;padding:20px;text-align:center;border-top:1px solid #e5e7eb;">
-            <p style="color:#9ca3af;font-size:12px;margin:0;">Stock Key Investments · SEBI Registered · NISM-Certified Experts</p>
+            <p style="color:#9ca3af;font-size:12px;margin:0;">Stock Key Investments · NISM-Certified Experts</p>
           </div>
         </div>
       `,
